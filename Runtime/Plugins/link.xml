@@ -1,0 +1,7 @@
+<linker>
+  <assembly fullname="LitJson" preserve="all"/>
+  <assembly fullname="minihost-plugin.taptap.runtime" preserve="all"/>
+  <assembly fullname="minihost-plugin.taptap.editor" preserve="all"/>
+  <assembly fullname="minihost-plugin.wxadaptor.runtime" preserve="all"/>
+    <assembly fullname="TapExtManagerHandler" preserve="all"/>
+</linker>

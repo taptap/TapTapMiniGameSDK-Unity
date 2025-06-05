@@ -1,0 +1,18 @@
+{
+    "presets": [
+      "@babel/preset-env",
+      ["minify", {
+        "builtIns": false,
+        "mangle": false,
+        "removeUndefined": false,
+        "deadcode": false,
+        "simplify": false,
+        "memberExpressions": false
+      }]
+    ],
+    "ignore": [
+      "webgl.wasm.framework.unityweb.js",
+      "cachedPlugin/UnityPlugin/*.js"
+    ],
+    "comments": false
+  }
