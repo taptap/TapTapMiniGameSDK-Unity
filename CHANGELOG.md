@@ -6,7 +6,22 @@ All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+## [2.0.6] - 2025.6.5
 
+### Fixed
+1. 修复编辑器下和addressable接口冲突问题
+
+### Added
+1. 新增创建桌面快捷图标接口
+
+## [2.0.5] - 2025.5.30
+
+### Added
+1. 新增成就接口
+2. 新增桌面文件夹接口
+
+### Fixed
+1. 修复部分接口回调错误
 
 ## [2.0.4] - 2025.5.20
 

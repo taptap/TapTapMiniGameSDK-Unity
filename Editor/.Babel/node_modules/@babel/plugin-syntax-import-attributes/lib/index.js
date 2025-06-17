@@ -20,9 +20,18 @@ var _default = exports.default = (0, _helperPluginUtils.declare)((api, {
     }) {
       var _generatorOpts$import;
       (_generatorOpts$import = generatorOpts.importAttributesKeyword) != null ? _generatorOpts$import : generatorOpts.importAttributesKeyword = "with";
-      parserOpts.plugins.push(["importAttributes", {
-        deprecatedAssertSyntax: Boolean(deprecatedAssertSyntax)
-      }]);
+      const importAssertionsPluginIndex = parserOpts.plugins.indexOf("importAssertions");
+      if (importAssertionsPluginIndex !== -1) {
+        parserOpts.plugins.splice(importAssertionsPluginIndex, 1);
+        deprecatedAssertSyntax = true;
+      }
+      if (deprecatedAssertSyntax) {
+        parserOpts.plugins.push("deprecatedImportAssert", ["importAttributes", {
+          deprecatedAssertSyntax: true
+        }]);
+      } else {
+        parserOpts.plugins.push("importAttributes");
+      }
     }
   };
 });
