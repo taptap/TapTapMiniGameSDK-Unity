@@ -34,6 +34,11 @@ namespace TapTapMiniGame
         {
             helper.UpdateWebGL2();
         }
+
+        public static bool ValidateRequiredFields()
+        {
+            return helper.ValidateRequiredFields();
+        }
     }
 
     public class TapTapSettingsHelper
@@ -162,8 +167,19 @@ namespace TapTapMiniGame
         {
             PlayerSettings.productName = this.getDataInput("projectName");
             config.ProjectConf.Appid = this.getDataInput("appid");
-            config.ProjectConf.CDN = this.getDataInput("cdn");
-            config.ProjectConf.assetLoadType = this.getDataPop("assetLoadType");
+            
+            // 根据首包资源加载方式设置CDN地址
+            int assetLoadType = this.getDataPop("assetLoadType");
+            if (assetLoadType == 0) // 选择了CDN
+            {
+                config.ProjectConf.CDN = this.getDataInput("cdn");
+            }
+            else // 选择了"小游戏包内"
+            {
+                config.ProjectConf.CDN = ""; // 清空CDN地址
+            }
+            
+            config.ProjectConf.assetLoadType = assetLoadType;
             config.ProjectConf.compressDataPackage = this.getDataCheckbox("compressDataPackage");
             config.ProjectConf.VideoUrl = this.getDataInput("videoUrl");
             config.ProjectConf.Orientation = (TJScreenOritation)this.getDataPop("orientation");
@@ -279,7 +295,7 @@ namespace TapTapMiniGame
             }
         }
 
-        public void formInput(string target, string label, string help = null)
+        public void formInput(string target, string label, string help = null, bool required = false)
         {
             if (!formInputData.ContainsKey(target))
             {
@@ -288,16 +304,50 @@ namespace TapTapMiniGame
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(string.Empty, GUILayout.Width(10));
-            if (help == null)
+            
+            if (required)
             {
-                GUILayout.Label(label, GUILayout.Width(140));
+                // 创建带红色*的标签内容
+                string labelWithStar = label;
+                if (help == null)
+                {
+                    // 使用富文本显示红色*
+                    GUIContent labelContent = new GUIContent(labelWithStar);
+                    GUILayout.Label(labelContent, GUILayout.Width(130));
+                    
+                    // 显示红色的*
+                    var originalColor = GUI.color;
+                    GUI.color = Color.red;
+                    GUILayout.Label("*", GUILayout.Width(10));
+                    GUI.color = originalColor;
+                }
+                else
+                {
+                    GUIContent labelContent = new GUIContent(labelWithStar, help);
+                    GUILayout.Label(labelContent, GUILayout.Width(130));
+                    
+                    // 显示红色的*
+                    var originalColor = GUI.color;
+                    GUI.color = Color.red;
+                    GUILayout.Label("*", GUILayout.Width(10));
+                    GUI.color = originalColor;
+                }
             }
             else
             {
-                GUILayout.Label(new GUIContent(label, help), GUILayout.Width(140));
+                if (help == null)
+                {
+                    GUILayout.Label(label, GUILayout.Width(140));
+                }
+                else
+                {
+                    GUILayout.Label(new GUIContent(label, help), GUILayout.Width(140));
+                }
             }
 
-            formInputData[target] = GUILayout.TextField(formInputData[target], GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 195));
+            // 添加负间距让输入框向左移动
+            GUILayout.Space(-5);
+            formInputData[target] = GUILayout.TextField(formInputData[target], GUILayout.Width(EditorGUIUtility.currentViewWidth - 185));
             GUILayout.EndHorizontal();
         }
 
@@ -311,7 +361,7 @@ namespace TapTapMiniGame
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(string.Empty, GUILayout.Width(10));
             GUILayout.Label(label, GUILayout.Width(140));
-            formIntPopupData[target] = EditorGUILayout.IntPopup(formIntPopupData[target], options, values, GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 195));
+            formIntPopupData[target] = EditorGUILayout.IntPopup(formIntPopupData[target], options, values, GUILayout.Width(EditorGUIUtility.currentViewWidth - 195));
             GUILayout.EndHorizontal();
         }
 
@@ -335,7 +385,7 @@ namespace TapTapMiniGame
                 GUILayout.Label(new GUIContent(label, help), GUILayout.Width(140));
             }
 
-            formCheckboxData[target] = EditorGUILayout.Toggle(disable ? false : formCheckboxData[target]);
+            formCheckboxData[target] = EditorGUILayout.Toggle(disable ? false : formCheckboxData[target], GUILayout.Width(20));
 
             if (setting != null)
             {
@@ -389,6 +439,52 @@ namespace TapTapMiniGame
             }
         }
 
+        public bool ValidateRequiredFields()
+        {
+            bool isValid = true;
+            string errorMessage = "构建失败，以下必填字段不能为空：\n";
+            
+            // 检查小游戏AppID
+            if (string.IsNullOrEmpty(getDataInput("appid")))
+            {
+                errorMessage += "• 小游戏AppID\n";
+                isValid = false;
+            }
+            
+            // 检查导出路径
+            if (string.IsNullOrEmpty(getDataInput("dst")))
+            {
+                errorMessage += "• 导出路径\n";
+                isValid = false;
+            }
+            
+            // 检查预分配堆大小
+            string memorySizeStr = getDataInput("memorySize");
+            if (string.IsNullOrEmpty(memorySizeStr) || !int.TryParse(memorySizeStr, out int memorySize) || memorySize <= 0)
+            {
+                errorMessage += "• 预分配堆大小（必须是大于0的整数）\n";
+                isValid = false;
+            }
+            
+            // 检查CDN地址（仅当首包资源加载方式选择CDN时）
+            int assetLoadType = getDataPop("assetLoadType");
+            if (assetLoadType == 0) // 选择了CDN
+            {
+                if (string.IsNullOrEmpty(getDataInput("cdn")))
+                {
+                    errorMessage += "• CDN地址（当首包资源加载方式选择CDN时必填）\n";
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid)
+            {
+                EditorUtility.DisplayDialog("构建失败", errorMessage, "确定");
+            }
+            
+            return isValid;
+        }
+
         public void OnDisable()
         {
             EditorUtility.SetDirty(config);
@@ -423,15 +519,22 @@ namespace TapTapMiniGame
             {
                 EditorGUILayout.BeginVertical("frameBox", GUILayout.ExpandWidth(true));
 
-                settingsHelper.formInput("appid", "游戏AppID");
+                settingsHelper.formInput("appid", "小游戏AppID", null, true);
 
                 if (showBuildPath)
                 {
                     GUILayout.BeginHorizontal();
                     var dst = settingsHelper.getDataInput("dst");
                     EditorGUILayout.LabelField(string.Empty, GUILayout.Width(10));
-                    GUILayout.Label("导出路径", GUILayout.Width(140));
-                    dst = GUILayout.TextField(dst, GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 270));
+                    // 显示带红色*的导出路径标签
+                    GUILayout.Label("导出路径", GUILayout.Width(130));
+                    var originalColor = GUI.color;
+                    GUI.color = Color.red;
+                    GUILayout.Label("*", GUILayout.Width(10));
+                    GUI.color = originalColor;
+                    // 添加负间距让输入框向左移动
+                    GUILayout.Space(-5);
+                    dst = GUILayout.TextField(dst, GUILayout.Width(EditorGUIUtility.currentViewWidth - 260));
                     if (GUILayout.Button(new GUIContent("打开"), GUILayout.Width(40)))
                     {
                         if (!dst.Trim().Equals(string.Empty))
@@ -472,8 +575,15 @@ namespace TapTapMiniGame
                 settingsHelper.formIntPopup("assetLoadType", "首包资源加载方式", new[] { "CDN", "小游戏包内" }, new[] { 0, 1 });
                 settingsHelper.formCheckbox("compressDataPackage", "压缩首包资源(?)", "将首包资源Brotli压缩, 降低资源大小. 注意: 首次启动耗时可能会增加200ms, 仅推荐使用小游戏分包加载时节省包体大小使用");
                 settingsHelper.formIntPopup("orientation", "游戏方向", new[] { "纵向", "横向" }, new[] { 0, 1 });
-                settingsHelper.formInput("cdn", "CDN地址");
-                settingsHelper.formInput("memorySize", "预分配堆大小", "单位MB，预分配内存值，超休闲游戏256/中轻度496/重度游戏768，需预估游戏最大UnityHeap值以防止内存自动扩容带来的峰值尖刺。");
+                
+                // 根据首包资源加载方式控制CDN地址输入框的显示和必填状态
+                int assetLoadType = settingsHelper.getDataPop("assetLoadType");
+                if (assetLoadType == 0) // 选择了CDN
+                {
+                    settingsHelper.formInput("cdn", "CDN地址", null, true); // 必填
+                }
+                // 如果选择了"小游戏包内"（值为1），则隐藏CDN输入框
+                settingsHelper.formInput("memorySize", "预分配堆大小", "单位MB，预分配内存值，超休闲游戏256/中轻度496/重度游戏768，需预估游戏最大UnityHeap值以防止内存自动扩容带来的峰值尖刺。", true);
                 settingsHelper.formCheckbox("iOSPerformancePlus", "IOSHighPerformance+",
                     "是否在iOS平台使用 Tuanjie 小游戏宿主的高性能+渲染方案，有助于提升渲染兼容性、降低WebContent进程内存。");
                 settingsHelper.setData("AutoUploadOnBuild", false);
@@ -503,6 +613,28 @@ namespace TapTapMiniGame
                 settingsHelper.formCheckbox("showMonitorSuggestModal", "显示优化建议弹窗");
                 EditorGUILayout.EndVertical();
             }
+
+            // 添加更多配置按钮
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(string.Empty, GUILayout.Width(10)); // 左边距
+            if (GUILayout.Button(new GUIContent("更多配置", "打开MiniGameConfig配置文件"), GUILayout.Width(80), GUILayout.Height(25)))
+            {
+                // 定位到MiniGameConfig.asset文件
+                string configPath = "Assets/TapTapMiniGame/Editor/MiniGameConfig.asset";
+                UnityEngine.Object configAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(configPath);
+                if (configAsset != null)
+                {
+                    Selection.activeObject = configAsset;
+                    EditorGUIUtility.PingObject(configAsset);
+                }
+                else
+                {
+                    // 如果文件不存在，显示警告
+                    EditorUtility.DisplayDialog("提示", $"未找到配置文件：{configPath}", "确定");
+                }
+            }
+            GUILayout.EndHorizontal();
 
 #if UNITY_INSTANTGAME
             foldInstantGame = EditorGUILayout.Foldout(foldInstantGame, "Instant Game - AutoStreaming");

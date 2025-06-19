@@ -36,6 +36,12 @@ namespace TapTapMiniGame
             GUILayout.Space(10);
             if (toBuild)
             {
+                // 验证必填字段
+                if (!TapTapBuildWindowHelper.ValidateRequiredFields())
+                {
+                    return;
+                }
+
                 ScriptingImplementation backend = PlayerSettings.GetScriptingBackend(EditorUserBuildSettings.selectedBuildTargetGroup);
                 bool isSupportWasmSplit = backend == ScriptingImplementation.IL2CPP;
 
