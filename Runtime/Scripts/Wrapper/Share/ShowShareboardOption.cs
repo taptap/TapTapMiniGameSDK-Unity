@@ -7,14 +7,14 @@ namespace TapTapMiniGame
     public class ShowShareboardOption
     {
         /// <summary>
-        /// 分享标题
+        /// 分享模板id，必传
         /// </summary>
-        public string title;
+        public string templateId;
         
         /// <summary>
-        /// 分享文案
+        /// 分享场景参数，用户打开分享卡片会将这个参数透传到小游戏
         /// </summary>
-        public string desc;
+        public string sceneParam;
 
         /// <summary>
         /// 接口调用结束的回调函数（调用成功、失败都会执行）

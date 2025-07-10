@@ -33,32 +33,15 @@ var TapShareLibrary = {
         const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
         tap.showShareboard(_Tap_ContactCommonCallback(args, _TJPointer_stringify_adaptor(callbackId)));
     },
-    Tap_OnShareMessage: function(){
-        const listener = function(resolve, channel){
-            window._tapOnShareMessageResolve = resolve;
-            SendMessage("TapExtManagerHandler", "OnShareMessageCallback", channel);
-        };
-        tap.onShareMessage(listener);
-    },
-    Tap_OnShareMessageResolve: function(conf, callbackId){
-        try {
-            const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(conf));
-            const merged = _Tap_ContactCommonCallback(args, _TJPointer_stringify_adaptor(callbackId));
-
-            if(window._tapOnShareMessageResolve){
-                window._tapOnShareMessageResolve(merged);
-                window._tapOnShareMessageResolve = null;
-            }
-        } catch(e) {
-             if(window._tapOnShareMessageResolve){
-                window._tapOnShareMessageResolve({});
-                window._tapOnShareMessageResolve = null;
-             }
-        }
+    Tap_OnShareMessage: function(callbackId){
+        tap.onShareMessage(_Tap_ContactCommonCallback(null, _TJPointer_stringify_adaptor(callbackId)));
     },
     Tap_OffShareMessage:function(){
         tap.offShareMessage();
     },
+    Tap_openFriendList: function(){
+        tap.openFriendList();
+    }
 };
 mergeInto(LibraryManager.library, TapShareLibrary);
 
@@ -135,3 +118,60 @@ var TapHomeScreenWidgetLibrary = {
     },
 };
 mergeInto(LibraryManager.library, TapHomeScreenWidgetLibrary);
+
+const TapLeaderboardLibrary = {
+    Tap_ContactLeaderboardCallback: function (args, callbackId) {
+        return Object.assign(args || {}, {
+            callback: {
+                onSuccess: function(res) {
+                    _Tap_JSCallback(callbackId, "success", res);
+                },
+                onFailure: function(code, message) {
+                    _Tap_JSCallback(callbackId, "fail", {
+                        code: code,
+                        message: message
+                    });
+                }
+            }
+        })
+    },
+    Tap_CreateLeaderBoardManager:function() {
+        window._tapLeaderBoardManager = tap.getLeaderboardManager();
+    },
+    Tap_LeaderBoardManager_OpenLeaderboard:function(str, callbackId){
+        if (!window._tapLeaderBoardManager) {
+            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+        }
+        const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
+        window._tapLeaderBoardManager.openLeaderboard(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
+    },
+    Tap_LeaderBoardManager_SubmitScores:function(str, callbackId){
+        if (!window._tapLeaderBoardManager) {
+            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+        }
+        const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
+        window._tapLeaderBoardManager.submitScores(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
+    },
+    Tap_LeaderBoardManager_LoadLeaderboardScores:function(str, callbackId){
+        if (!window._tapLeaderBoardManager) {
+            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+        }
+        const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
+        window._tapLeaderBoardManager.loadLeaderboardScores(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
+    },
+    Tap_LeaderBoardManager_LoadCurrentPlayerLeaderboardScore:function(str, callbackId){
+        if (!window._tapLeaderBoardManager) {
+            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+        }
+        const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
+        window._tapLeaderBoardManager.loadCurrentPlayerLeaderboardScore(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
+    },
+    Tap_LeaderBoardManager_LoadPlayerCenteredScores:function(str, callbackId){
+        if (!window._tapLeaderBoardManager) {
+            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+        }
+        const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
+        window._tapLeaderBoardManager.loadPlayerCenteredScores(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
+    }
+};
+mergeInto(LibraryManager.library, TapLeaderboardLibrary);

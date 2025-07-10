@@ -15,14 +15,19 @@ namespace TapTapMiniGame
             TapExtManagerHandler.Instance.ShowShareboard(option);
         }
         
-        public static void OnShareMessage(Action<Action<ShareMessageParam>, string> action)
+        public static void OnShareMessage(OnShareOption option)
         {
-            TapExtManagerHandler.Instance.OnShareMessage(action);
+            TapExtManagerHandler.Instance.OnShareMessage(option);
         }
 
         public static void OffShareMessage()
         {
             TapExtManagerHandler.Instance.OffShareMessage();
+        }
+
+        public static void OpenFriendList()
+        {
+            TapExtManagerHandler.Instance.OpenFriendList();
         }
         
         public static void CreateHomeScreenWidget(CreateHomeScreenWidgetOption option)
@@ -33,6 +38,36 @@ namespace TapTapMiniGame
         public static void HasHomeScreenWidgetAndPinned(HasHomeScreenWidgetOption option)
         {
             TapExtManagerHandler.Instance.HasHomeScreenWidgetAndPinned(option);
+        }
+
+        public static void GetLeaderBoardManager()
+        {
+            TapExtManagerHandler.Instance.GetLeaderBoardManager();
+        }
+
+        public static void OpenLeaderboard(OpenLeaderboardOption option)
+        {
+            TapExtManagerHandler.Instance.OpenLeaderboard(option);
+        }
+
+        public static void SubmitScore(SubmitScoreOption option)
+        {
+            TapExtManagerHandler.Instance.SubmitScores(option);
+        }
+
+        public static void LoadLeaderboardScores(LoadLeaderboardScoresOption option)
+        {
+            TapExtManagerHandler.Instance.LoadLeaderboardScores(option);
+        }
+
+        public static void LoadCurrentPlayerLeaderboardScore(LoadCurrentPlayerLeaderboardScoreOption option)
+        {
+            TapExtManagerHandler.Instance.LoadCurrentPlayerLeaderboardScore(option);
+        }
+
+        public static void LoadPlayerCenteredScores(LoadPlayerCenteredScoresOption option)
+        {
+            TapExtManagerHandler.Instance.LoadPlayerCenteredScores(option);
         }
     }
 
