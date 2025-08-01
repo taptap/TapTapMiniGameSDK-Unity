@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.0.7] - 2025.7.10
 
+### Added
+1. 新增Unity调试工具
+
 ### Fixed
 1. 修复分享接口的报错
 
