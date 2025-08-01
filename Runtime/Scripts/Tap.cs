@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if (UNITY_WEBGL || UNITY_MINIGAME || WEIXINMINIGAME) && !(UNITY_EDITOR && TAP_DEBUG_ENABLE)
+using System;
 
 namespace TapTapMiniGame
 {
@@ -2344,3 +2345,4 @@ namespace TapTapMiniGame
 
     }
 }
+#endif
