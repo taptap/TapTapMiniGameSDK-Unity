@@ -39,6 +39,48 @@ namespace TapTapMiniGame
         {
             return helper.ValidateRequiredFields();
         }
+
+        /// <summary>
+        /// 执行TapTap小游戏构建
+        /// </summary>
+        /// <param name="validateFields">是否验证必填字段，默认为true</param>
+        /// <returns>构建是否成功启动</returns>
+        public static bool BuildTapTapMiniGame(bool validateFields = true)
+        {
+            try
+            {
+                // 验证必填字段
+                if (validateFields && !ValidateRequiredFields())
+                {
+                    return false;
+                }
+
+                ScriptingImplementation backend = PlayerSettings.GetScriptingBackend(EditorUserBuildSettings.selectedBuildTargetGroup);
+                bool isSupportWasmSplit = backend == ScriptingImplementation.IL2CPP;
+
+                TJEditorScriptObject config = TapTapUtil.GetEditorConf();
+                
+                // 设置构建选项
+                config.buildOptions = UnityUtil.GetBuildOptions(config);
+                
+                Debug.Log($"使用构建选项: {config.buildOptions}");
+                Debug.Log($"构建场景: {string.Join(", ", EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path))}");
+                
+                // 更新WebGL2设置
+                UpdateWebGL2();
+                
+                // 执行TapTap构建
+                TapTapConvertCore.DoExport(config, isSupportWasmSplit);
+                
+                Debug.Log("TapTap小游戏构建已启动");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"TapTap小游戏构建失败: {e.Message}");
+                return false;
+            }
+        }
     }
 
     public class TapTapSettingsHelper
@@ -441,6 +483,20 @@ namespace TapTapMiniGame
 
         public bool ValidateRequiredFields()
         {
+            // 检查是否开启了调试模式
+            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            if (defines.Contains("TAP_DEBUG_ENABLE"))
+            {
+                // 创建自定义对话框
+                var result = ShowDebugModeDialog();
+                if (result == 0) // 用户点击了"关闭调试"
+                {
+                    RemoveDebugDefine();
+                }
+
+                return false;
+            }
+            
             bool isValid = true;
             string errorMessage = "构建失败，以下必填字段不能为空：\n";
             
@@ -483,6 +539,41 @@ namespace TapTapMiniGame
             }
             
             return isValid;
+        }
+
+        private int ShowDebugModeDialog()
+        {
+            // 创建自定义对话框内容
+            string title = "检测到调试模式";
+            string message = "当前项目开启了Tap小游戏调试模式，无法进行正式构建。\n\n请选择操作：";
+            
+            // 使用EditorUtility.DisplayDialogComplex创建两按钮对话框
+            // 返回值：0=确定, 1=取消
+            var result = EditorUtility.DisplayDialogComplex(
+                title, 
+                message, 
+                "关闭调试", // ok按钮（绿色效果通过按钮文本体现）
+                "取消",     // cancel按钮  
+                ""          // alt按钮(留空)
+            );
+            
+            return result;
+        }
+        
+        private void RemoveDebugDefine()
+        {
+            var targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(targetGroup);
+            
+            // 移除TAP_DEBUG_ENABLE符号
+            var definesList = defines.Split(';').ToList();
+            definesList.RemoveAll(x => x.Trim() == "TAP_DEBUG_ENABLE");
+            
+            // 更新ScriptingDefineSymbols
+            string newDefines = string.Join(";", definesList.Where(x => !string.IsNullOrWhiteSpace(x)));
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(targetGroup, newDefines);
+            
+            Debug.Log("已移除TAP_DEBUG_ENABLE调试符号");
         }
 
         public void OnDisable()

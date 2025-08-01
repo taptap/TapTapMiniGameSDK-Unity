@@ -1,4 +1,4 @@
-#if UNITY_WEBGL || WEIXINMINIGAME || UNITY_EDITOR
+#if (UNITY_WEBGL || WEIXINMINIGAME || UNITY_EDITOR) && !TAP_DEBUG_ENABLE
 using System.Collections.Generic;
 
 using UnityEngine;
