@@ -461,10 +461,10 @@ namespace TapTapMiniGame.Editor
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             GUILayout.Label("Actions", EditorStyles.boldLabel);
-            
+
             EditorGUILayout.BeginHorizontal();
-            
-            // 只保留停止服务器按钮
+
+            // 根据服务器状态显示不同按钮
             if (cachedServerInfo.isRunning)
             {
                 GUI.color = Color.red;
@@ -474,10 +474,26 @@ namespace TapTapMiniGame.Editor
                 }
                 GUI.color = Color.white;
             }
+            else if (Application.isPlaying)
+            {
+                GUI.color = Color.green;
+                if (GUILayout.Button("Start Server", GUILayout.Height(30)))
+                {
+#if (UNITY_WEBGL || UNITY_MINIGAME) && UNITY_EDITOR && TAP_DEBUG_ENABLE
+                    var serverModule = NetworkServerModule.Instance;
+                    if (serverModule != null)
+                    {
+                        serverModule.StartServer();
+                        RefreshServerInfo();
+                    }
+#endif
+                }
+                GUI.color = Color.white;
+            }
             else
             {
                 GUI.enabled = false;
-                GUILayout.Button("Server Stopped", GUILayout.Height(30));
+                GUILayout.Button("Server Stopped (Enter Play Mode)", GUILayout.Height(30));
                 GUI.enabled = true;
             }
             
@@ -532,16 +548,16 @@ namespace TapTapMiniGame.Editor
             // 操作按钮
             if (!isDownloading && !isLocalServerRunning)
             {
-                if (GUILayout.Button("开始下载并启动服务器"))
+                if (Application.isPlaying)
                 {
-                    _ = StartDownload();
+                    if (GUILayout.Button("开始下载并启动服务器"))
+                    {
+                        _ = StartDownload();
+                    }
                 }
-            }
-            else if (isLocalServerRunning)
-            {
-                if (GUILayout.Button("停止本地服务器"))
+                else
                 {
-                    StopLocalServer();
+                    EditorGUILayout.HelpBox("请先进入Play模式以启动服务器", MessageType.Info);
                 }
             }
 
