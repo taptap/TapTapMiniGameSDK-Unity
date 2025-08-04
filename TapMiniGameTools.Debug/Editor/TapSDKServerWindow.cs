@@ -534,7 +534,7 @@ namespace TapTapMiniGame.Editor
 
             // 服务器状态
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("本地服务器状态", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("本地小游戏静态服务器：", EditorStyles.boldLabel);
             EditorGUILayout.LabelField($"状态: {(isLocalServerRunning ? "运行中" : "已停止")}");
             if (isLocalServerRunning)
             {

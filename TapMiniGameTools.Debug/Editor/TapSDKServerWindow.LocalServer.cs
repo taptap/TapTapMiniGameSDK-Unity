@@ -7,6 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Text;
 using System;
+using System.Collections;
 using System.Threading;
 using System.Net.Sockets;
 using System.Linq;
@@ -14,7 +15,7 @@ using UnityEngine.Networking;
 
 namespace TapTapMiniGame.Editor
 {
-    public partial class TapSDKServerWindow
+    public partial class TapSDKServerWindow : EditorWindow
     {
         #region 常量定义
         /// <summary>
@@ -437,7 +438,8 @@ namespace TapTapMiniGame.Editor
                 _ = Task.Run(() => ListenForLocalRequests(localServerCancellation.Token));
 
                 // 生成二维码
-                GenerateLocalQRCode();
+                WaitForServerAndGenerateQRCode();
+
 
                 Debug.Log($"Local server started on {localIP}:{localServerPort}");
             }
@@ -668,6 +670,17 @@ namespace TapTapMiniGame.Editor
         #endregion
 
         #region 二维码生成
+        
+        private async void WaitForServerAndGenerateQRCode()
+        {
+            // 0.1秒轮询检查cachedServerInfo.isRunning=true时才执行GenerateLocalQRCode
+            while (!cachedServerInfo.isRunning)
+            {
+                await Task.Delay(100); // 等待0.1秒
+            }
+            GenerateLocalQRCode();
+        }
+        
         private void GenerateLocalQRCode()
         {
             if (string.IsNullOrEmpty(localServerUrl)) return;
@@ -690,13 +703,12 @@ namespace TapTapMiniGame.Editor
                 };
 
                 // 添加scene_param参数 - 使用本地服务器地址
-                if (!string.IsNullOrEmpty(localServerUrl))
+                if (!string.IsNullOrEmpty(cachedServerInfo.serverAddress))
                 {
                     // 使用本地服务器的地址作为 scene_param
-                    string serverAddress = localServerUrl.TrimEnd('/'); // 移除末尾的斜杠
-                    options.Add("scene_param", serverAddress);
-                    options.Add("dev_params", serverAddress);
-                    Debug.Log($"Added scene_param: {serverAddress}");
+                    options.Add("scene_param", cachedServerInfo.serverAddress);
+                    options.Add("dev_params", cachedServerInfo.serverAddress);
+                    Debug.Log($"Added scene_param: {cachedServerInfo.serverAddress}");
                 }
                 else
                 {
