@@ -147,13 +147,21 @@ namespace TapTapMiniGame.Editor
         {
             if (state == PlayModeStateChange.EnteredPlayMode)
             {
-                var window = GetWindow<TapSDKServerWindow>();
-                window.OnLocalServerEnable();
+                // 只有当窗口已经打开时才调用相关方法，避免自动创建窗口
+                if (HasOpenInstances<TapSDKServerWindow>())
+                {
+                    var window = GetWindow<TapSDKServerWindow>();
+                    window.OnLocalServerEnable();
+                }
             }
             else if (state == PlayModeStateChange.ExitingPlayMode)
             {
-                var window = GetWindow<TapSDKServerWindow>();
-                window.OnLocalServerDisable();
+                // 只有当窗口已经打开时才调用相关方法，避免自动创建窗口
+                if (HasOpenInstances<TapSDKServerWindow>())
+                {
+                    var window = GetWindow<TapSDKServerWindow>();
+                    window.OnLocalServerDisable();
+                }
             }
         }
 
