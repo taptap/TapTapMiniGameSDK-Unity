@@ -140,35 +140,35 @@ const TapLeaderboardLibrary = {
     },
     Tap_LeaderBoardManager_OpenLeaderboard:function(str, callbackId){
         if (!window._tapLeaderBoardManager) {
-            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+            window._tapLeaderBoardManager = tap.getLeaderboardManager();
         }
         const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
         window._tapLeaderBoardManager.openLeaderboard(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
     },
     Tap_LeaderBoardManager_SubmitScores:function(str, callbackId){
         if (!window._tapLeaderBoardManager) {
-            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+            window._tapLeaderBoardManager = tap.getLeaderboardManager();
         }
         const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
         window._tapLeaderBoardManager.submitScores(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
     },
     Tap_LeaderBoardManager_LoadLeaderboardScores:function(str, callbackId){
         if (!window._tapLeaderBoardManager) {
-            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+            window._tapLeaderBoardManager = tap.getLeaderboardManager();
         }
         const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
         window._tapLeaderBoardManager.loadLeaderboardScores(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
     },
     Tap_LeaderBoardManager_LoadCurrentPlayerLeaderboardScore:function(str, callbackId){
         if (!window._tapLeaderBoardManager) {
-            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+            window._tapLeaderBoardManager = tap.getLeaderboardManager();
         }
         const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
         window._tapLeaderBoardManager.loadCurrentPlayerLeaderboardScore(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
     },
     Tap_LeaderBoardManager_LoadPlayerCenteredScores:function(str, callbackId){
         if (!window._tapLeaderBoardManager) {
-            window._tapLeaderBoardManager = tap.createLeaderBoardManager();
+            window._tapLeaderBoardManager = tap.getLeaderboardManager();
         }
         const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
         window._tapLeaderBoardManager.loadPlayerCenteredScores(_Tap_ContactLeaderboardCallback(args, _TJPointer_stringify_adaptor(callbackId)))
