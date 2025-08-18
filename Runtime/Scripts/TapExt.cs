@@ -101,6 +101,74 @@ namespace TapTapMiniGame
             TapExtManagerHandler.Instance.AchievementManager_SetToastEnabled(enabled);
         }
     }
+
+    /// <summary>
+    /// 云存档管理类
+    /// </summary>
+    public class TapCloudSave
+    {
+        /// <summary>
+        /// 初始化云存档管理器
+        /// </summary>
+        public static void Setup()
+        {
+            TapExtManagerHandler.Instance.CreateCloudSaveManager();
+        }
+
+        /// <summary>
+        /// 创建存档
+        /// </summary>
+        /// <param name="option">创建存档选项</param>
+        public static void CreateArchive(CreateArchiveOption option)
+        {
+            TapExtManagerHandler.Instance.CloudSaveManager_CreateArchive(option);
+        }
+
+        /// <summary>
+        /// 更新存档
+        /// </summary>
+        /// <param name="option">更新存档选项</param>
+        public static void UpdateArchive(UpdateArchiveOption option)
+        {
+            TapExtManagerHandler.Instance.CloudSaveManager_UpdateArchive(option);
+        }
+
+        /// <summary>
+        /// 获取存档列表
+        /// </summary>
+        /// <param name="option">获取存档列表选项</param>
+        public static void GetArchiveList(GetArchiveListOption option)
+        {
+            TapExtManagerHandler.Instance.CloudSaveManager_GetArchiveList(option);
+        }
+
+        /// <summary>
+        /// 获取存档数据
+        /// </summary>
+        /// <param name="option">获取存档数据选项</param>
+        public static void GetArchiveData(GetArchiveDataOption option)
+        {
+            TapExtManagerHandler.Instance.CloudSaveManager_GetArchiveData(option);
+        }
+
+        /// <summary>
+        /// 获取存档封面
+        /// </summary>
+        /// <param name="option">获取存档封面选项</param>
+        public static void GetArchiveCover(GetArchiveCoverOption option)
+        {
+            TapExtManagerHandler.Instance.CloudSaveManager_GetArchiveCover(option);
+        }
+
+        /// <summary>
+        /// 删除存档
+        /// </summary>
+        /// <param name="option">删除存档选项</param>
+        public static void DeleteArchive(DeleteArchiveOption option)
+        {
+            TapExtManagerHandler.Instance.CloudSaveManager_DeleteArchive(option);
+        }
+    }
 }
 
 #endif
