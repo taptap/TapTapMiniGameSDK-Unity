@@ -7,6 +7,16 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.8] - 2025.8.18
+
+### Added
+1. 新增云存档功模块
+
+### Fixed
+1. 更新convert版本
+2. 修复排行榜API报错
+
+
 ## [2.0.7] - 2025.7.10
 
 ### Added
