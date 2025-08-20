@@ -185,10 +185,10 @@ const TapCloudSaveLibrary = {
                 window._tapCloudSaveManager = tap.getCloudSaveManager();
             }
             const csharpArgs = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
-            const callbackIdStr = _TJPointer_stringify_adaptor(callbackId); // 在函数开始时转换callbackId
-            console.log("[TapCloudSave] C# args:", csharpArgs);
+            const callbackIdStr = _TJPointer_stringify_adaptor(callbackId); // Convert callbackId at the beginning of function
+
             
-            // 转换C#参数格式为JS API格式
+            // Convert C# parameter format to JS API format
             const jsArgs = {
                 archiveMetaData: {
                     name: csharpArgs.name,
@@ -196,38 +196,38 @@ const TapCloudSaveLibrary = {
                     extra: csharpArgs.data || "",
                     playtime: csharpArgs.playtime || 0
                 },
-                archiveFilePath: csharpArgs.archiveFilePath,  // 现在这是必需参数
+                archiveFilePath: csharpArgs.archiveFilePath,  // Now this is a required parameter
                 success: function(res) {
-                    console.log("[TapCloudSave] CreateArchive success:", res);
-                    // 转换返回格式：文档返回{uuid, fileId}，C#期望{archiveId, fileId}
+
+                    // Convert return format: API returns {uuid, fileId}, C# expects {archiveId, fileId}
                     const convertedRes = {
                         archiveId: res.uuid || "", // uuid -> archiveId
-                        fileId: res.fileId || ""   // 保留fileId
+                        fileId: res.fileId || ""   // Keep fileId
                     };
-                    console.log("[TapCloudSave] CreateArchive converted response:", convertedRes);
+
                     _Tap_JSCallback(callbackIdStr, "success", convertedRes);
                 },
                 fail: function(errMsg, errno) {
-                    console.log("[TapCloudSave] CreateArchive fail:", errMsg, errno);
-                    _Tap_JSCallback(callbackIdStr, "fail", { // 直接使用字符串
+
+                    _Tap_JSCallback(callbackIdStr, "fail", { // Use string directly
                         code: errno || -1,
                         message: errMsg || "CreateArchive failed"
                     });
                 },
                 complete: function(errMsg, errno) {
-                    console.log("[TapCloudSave] CreateArchive complete:", errMsg, errno);
+
                 }
             };
             
-            // 如果有封面路径，添加封面路径
+            // Add cover path if available
             if (csharpArgs.archiveCoverPath) {
                 jsArgs.archiveCoverPath = csharpArgs.archiveCoverPath;
             }
             
-            console.log("[TapCloudSave] JS args:", jsArgs);
+
             window._tapCloudSaveManager.createArchive(jsArgs);
         } catch (error) {
-            console.error("[TapCloudSave] CreateArchive error:", error);
+
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
@@ -242,11 +242,11 @@ const TapCloudSaveLibrary = {
             }
             const csharpArgs = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            console.log("[TapCloudSave] UpdateArchive C# args:", csharpArgs);
+
             
-            // 转换C#参数格式为JS API格式
+            // Convert C# parameter format to JS API format
             const jsArgs = {
-                archiveUUID: csharpArgs.archiveId, // C#使用archiveId，JS API需要archiveUUID
+                archiveUUID: csharpArgs.archiveId, // C# uses archiveId, JS API needs archiveUUID
                 archiveMetaData: {
                     name: csharpArgs.name,
                     summary: csharpArgs.description || csharpArgs.name,
@@ -255,30 +255,30 @@ const TapCloudSaveLibrary = {
                 },
                 archiveFilePath: csharpArgs.archiveFilePath,
                 success: function(res) {
-                    console.log("[TapCloudSave] UpdateArchive success:", res);
+
                     _Tap_JSCallback(callbackIdStr, "success", res);
                 },
                 fail: function(errMsg, errno) {
-                    console.log("[TapCloudSave] UpdateArchive fail:", errMsg, errno);
+
                     _Tap_JSCallback(callbackIdStr, "fail", {
                         code: errno || -1,
                         message: errMsg || "UpdateArchive failed"
                     });
                 },
                 complete: function(errMsg, errno) {
-                    console.log("[TapCloudSave] UpdateArchive complete:", errMsg, errno);
+
                 }
             };
             
-            // 如果有封面路径，添加封面路径
+            // Add cover path if available
             if (csharpArgs.archiveCoverPath) {
                 jsArgs.archiveCoverPath = csharpArgs.archiveCoverPath;
             }
             
-            console.log("[TapCloudSave] UpdateArchive JS args:", jsArgs);
+
             window._tapCloudSaveManager.updateArchive(jsArgs);
         } catch (error) {
-            console.error("[TapCloudSave] UpdateArchive error:", error);
+
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
@@ -292,43 +292,43 @@ const TapCloudSaveLibrary = {
                 window._tapCloudSaveManager = tap.getCloudSaveManager();
             }
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            console.log("[TapCloudSave] GetArchiveList - 获取存档列表");
+
             
-            // 根据文档，getArchiveList不需要参数，只需要回调
+            // According to docs, getArchiveList needs no parameters, only callbacks
             const jsArgs = {
                 success: function(res) {
-                    console.log("[TapCloudSave] GetArchiveList success:", res);
-                    // 转换返回数据格式：saves -> archives, ArchiveDetailData格式转换
+
+                    // Convert return data format: saves -> archives, ArchiveDetailData format conversion
                     const convertedRes = {
                         total: res.saves ? res.saves.length : 0,
                         archives: res.saves ? res.saves.map(save => ({
                             archiveId: save.uuid,        // uuid -> archiveId
-                            fileId: save.fileId,         // 保留fileId供后续使用
+                            fileId: save.fileId,         // Keep fileId for future use
                             name: save.name,
                             description: save.summary,   // summary -> description
                             size: save.saveSize,         // saveSize -> size
-                            createTime: save.createdTime * 1000,  // 秒转毫秒
-                            modifyTime: save.modifiedTime * 1000,  // 秒转毫秒
-                            data: save.extra || ""       // 额外数据
+                            createTime: save.createdTime * 1000,  // Convert seconds to milliseconds
+                            modifyTime: save.modifiedTime * 1000,  // Convert seconds to milliseconds
+                            data: save.extra || ""       // Extra data
                         })) : []
                     };
                     _Tap_JSCallback(callbackIdStr, "success", convertedRes);
                 },
                 fail: function(errMsg, errno) {
-                    console.log("[TapCloudSave] GetArchiveList fail:", errMsg, errno);
+
                     _Tap_JSCallback(callbackIdStr, "fail", {
                         code: errno || -1,
                         message: errMsg || "GetArchiveList failed"
                     });
                 },
                 complete: function(errMsg, errno) {
-                    console.log("[TapCloudSave] GetArchiveList complete:", errMsg, errno);
+
                 }
             };
             
             window._tapCloudSaveManager.getArchiveList(jsArgs);
         } catch (error) {
-            console.error("[TapCloudSave] GetArchiveList error:", error);
+
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
@@ -343,34 +343,34 @@ const TapCloudSaveLibrary = {
             }
             const csharpArgs = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            console.log("[TapCloudSave] GetArchiveData C# args:", csharpArgs);
+
             
-            // 根据文档，getArchiveData需要archiveUUID和archiveFileId
+            // According to docs, getArchiveData needs archiveUUID and archiveFileId
             const jsArgs = {
-                archiveUUID: csharpArgs.archiveId,  // 存档UUID
-                archiveFileId: csharpArgs.fileId || csharpArgs.archiveId, // 使用fileId，如果没有则使用archiveId作为备用
-                targetFilePath: csharpArgs.targetFilePath || "", // 可选参数
+                archiveUUID: csharpArgs.archiveId,  // Archive UUID
+                archiveFileId: csharpArgs.fileId || csharpArgs.archiveId, // Use fileId, fallback to archiveId if not available
+                targetFilePath: csharpArgs.targetFilePath || "", // Optional parameter
                 success: function(res) {
-                    console.log("[TapCloudSave] GetArchiveData success:", res);
-                    // 根据文档，res.filePath包含下载的文件路径，需要读取文件内容
+
+                    // According to docs, res.filePath contains downloaded file path, need to read file content
                     try {
-                        // 读取文件内容
+                        // Read file content
                         const fileContent = tap.getFileSystemManager().readFileSync(res.filePath, 'utf8');
-                        console.log("[TapCloudSave] GetArchiveData file content:", fileContent);
+
                         
-                        // 转换返回数据格式
+                        // Convert return data format
                         const convertedRes = {
-                            data: fileContent || "", // 文件内容
+                            data: fileContent || "", // File content
                             archive: {
-                                name: "Archive", // 简化处理，实际应该从存档列表获取
+                                name: "Archive", // Simplified handling, should get from archive list in practice
                                 archiveId: csharpArgs.archiveId,
                                 size: fileContent ? fileContent.length : 0
                             }
                         };
                         _Tap_JSCallback(callbackIdStr, "success", convertedRes);
                     } catch (readError) {
-                        console.error("[TapCloudSave] GetArchiveData read file error:", readError);
-                        // 如果文件读取失败，返回文件路径作为数据
+
+                        // If file read fails, return file path as data
                         const convertedRes = {
                             data: res.filePath || "",
                             archive: {
@@ -383,21 +383,21 @@ const TapCloudSaveLibrary = {
                     }
                 },
                 fail: function(errMsg, errno) {
-                    console.log("[TapCloudSave] GetArchiveData fail:", errMsg, errno);
+
                     _Tap_JSCallback(callbackIdStr, "fail", {
                         code: errno || -1,
                         message: errMsg || "GetArchiveData failed"
                     });
                 },
                 complete: function(errMsg, errno) {
-                    console.log("[TapCloudSave] GetArchiveData complete:", errMsg, errno);
+
                 }
             };
             
-            console.log("[TapCloudSave] GetArchiveData JS args:", jsArgs);
+
             window._tapCloudSaveManager.getArchiveData(jsArgs);
         } catch (error) {
-            console.error("[TapCloudSave] GetArchiveData error:", error);
+
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
@@ -412,37 +412,37 @@ const TapCloudSaveLibrary = {
             }
             const csharpArgs = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            console.log("[TapCloudSave] GetArchiveCover C# args:", csharpArgs);
+
             
-            // 根据文档，getArchiveCover需要archiveUUID和archiveFileId
+            // According to docs, getArchiveCover needs archiveUUID and archiveFileId
             const jsArgs = {
                 archiveUUID: csharpArgs.archiveId,
-                archiveFileId: csharpArgs.archiveId, // 简化处理，使用相同值
-                targetFilePath: csharpArgs.targetFilePath || "", // 可选参数
+                archiveFileId: csharpArgs.archiveId, // Simplified handling, use same value
+                targetFilePath: csharpArgs.targetFilePath || "", // Optional parameter
                 success: function(res) {
-                    console.log("[TapCloudSave] GetArchiveCover success:", res);
-                    // 转换返回数据格式
+
+                    // Convert return data format
                     const convertedRes = {
                         filePath: res.filePath || ""
                     };
                     _Tap_JSCallback(callbackIdStr, "success", convertedRes);
                 },
                 fail: function(errMsg, errno) {
-                    console.log("[TapCloudSave] GetArchiveCover fail:", errMsg, errno);
+
                     _Tap_JSCallback(callbackIdStr, "fail", {
                         code: errno || -1,
                         message: errMsg || "GetArchiveCover failed"
                     });
                 },
                 complete: function(errMsg, errno) {
-                    console.log("[TapCloudSave] GetArchiveCover complete:", errMsg, errno);
+
                 }
             };
             
-            console.log("[TapCloudSave] GetArchiveCover JS args:", jsArgs);
+
             window._tapCloudSaveManager.getArchiveCover(jsArgs);
         } catch (error) {
-            console.error("[TapCloudSave] GetArchiveCover error:", error);
+
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
@@ -457,35 +457,35 @@ const TapCloudSaveLibrary = {
             }
             const csharpArgs = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            console.log("[TapCloudSave] DeleteArchive C# args:", csharpArgs);
+
             
-            // 根据文档，deleteArchive需要archiveUUID
+            // According to docs, deleteArchive needs archiveUUID
             const jsArgs = {
-                archiveUUID: csharpArgs.archiveId, // C#使用archiveId，JS API需要archiveUUID
+                archiveUUID: csharpArgs.archiveId, // C# uses archiveId, JS API needs archiveUUID
                 success: function(res) {
-                    console.log("[TapCloudSave] DeleteArchive success:", res);
-                    // 转换返回数据格式：文档返回{uuid}，C#期望{archiveId}
+
+                    // Convert return data format: API returns {uuid}, C# expects {archiveId}
                     const convertedRes = {
                         archiveId: res.uuid || csharpArgs.archiveId
                     };
                     _Tap_JSCallback(callbackIdStr, "success", convertedRes);
                 },
                 fail: function(errMsg, errno) {
-                    console.log("[TapCloudSave] DeleteArchive fail:", errMsg, errno);
+
                     _Tap_JSCallback(callbackIdStr, "fail", {
                         code: errno || -1,
                         message: errMsg || "DeleteArchive failed"
                     });
                 },
                 complete: function(errMsg, errno) {
-                    console.log("[TapCloudSave] DeleteArchive complete:", errMsg, errno);
+
                 }
             };
             
-            console.log("[TapCloudSave] DeleteArchive JS args:", jsArgs);
+
             window._tapCloudSaveManager.deleteArchive(jsArgs);
         } catch (error) {
-            console.error("[TapCloudSave] DeleteArchive error:", error);
+
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
