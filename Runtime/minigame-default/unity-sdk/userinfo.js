@@ -1,28 +1,29 @@
 import moduleHelper from './module-helper';
-import { getListObject, uid } from './utils';
+import { getListObject, uid, formatJsonStr } from './utils';
 const userInfoButtonList = {};
 const getObject = getListObject(userInfoButtonList, 'userInfoButton');
 export default {
-        TJCreateUserInfoButton(x, y, width, height, lang, withCredentials) {
+    TJCreateUserInfoButton(option) {
+        const config = formatJsonStr(option);
         const id = uid();
         const button = tj.createUserInfoButton({
-            type: 'text',
-            text: '',
-            withCredentials,
-            lang,
+            type: config.type,
+            text: config.text,
+            withCredentials: config.withCredentials || true,
+            lang: config.lang || 'en',
             style: {
-                left: x / window.devicePixelRatio,
-                top: y / window.devicePixelRatio,
-                width: width / window.devicePixelRatio,
-                height: height / window.devicePixelRatio,
-                backgroundColor: 'rgba(0, 0, 0, 0)',
-                color: 'rgba(0, 0, 0, 0)',
-                textAlign: 'center',
-                fontSize: 0,
-                borderRadius: 0,
-                borderColor: '#FFFFFF',
-                borderWidth: 0,
-                lineHeight: height / window.devicePixelRatio,
+                left: config.style.left / window.devicePixelRatio,
+                top: config.style.top / window.devicePixelRatio,
+                width: config.style.width / window.devicePixelRatio,
+                height: config.style.height / window.devicePixelRatio,
+                backgroundColor: config.style.backgroundColor,
+                color: config.style.color,
+                textAlign: config.style.textAlign,
+                fontSize: config.style.fontSize,
+                borderRadius: config.style.borderRadius,
+                borderColor: config.style.borderColor,
+                borderWidth: config.style.borderWidth,
+                lineHeight: config.style.lineHeight / window.devicePixelRatio,
             },
         });
         userInfoButtonList[id] = button;

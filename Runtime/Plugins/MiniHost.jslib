@@ -1182,11 +1182,11 @@ mergeInto(LibraryManager.library, {
     TJAuthorize: function (scope, s, f, c) {
         window.TJWASMSDK.TJAuthorize(_TJPointer_stringify_adaptor(scope), _TJPointer_stringify_adaptor(s), _TJPointer_stringify_adaptor(f), _TJPointer_stringify_adaptor(c));
     },
-    TJCreateUserInfoButton: function (x, y, width, height, lang, withCredentials) {
-        var returnStr = window.TJWASMSDK.TJCreateUserInfoButton(x, y, width, height, _TJPointer_stringify_adaptor(lang), withCredentials);
-        var bufferSize = lengthBytesUTF8(returnStr || '') + 1;
+    TJCreateUserInfoButton:function(option) {
+        var res = window.TJWASMSDK.TJCreateUserInfoButton(_TJPointer_stringify_adaptor(option));
+        var bufferSize = lengthBytesUTF8(res || '') + 1;
         var buffer = _malloc(bufferSize);
-        stringToUTF8(returnStr, buffer, bufferSize);
+        stringToUTF8(res, buffer, bufferSize);
         return buffer;
     },
     TJUserInfoButtonShow: function (id) {
