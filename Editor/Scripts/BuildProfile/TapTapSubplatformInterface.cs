@@ -28,6 +28,16 @@ namespace TapTapMiniGame
         {
             return new TapTapMiniGameSettings(new TapTapMiniGameSettingsEditor());
         }
+        
+        public override string GetSubplatformLink()
+        {
+            return "https://developer.taptap.cn/minigameapidoc/dev/engine/unity-adaptation/unity-webGL/";
+        }
+
+        public override string GetSubplatformTooltip()
+        {
+            return "点击查看TapTap小游戏文档";
+        }
 
         private static bool MiniGameHostBuildPreprocess(BuildProfile buildProfile)
         {
