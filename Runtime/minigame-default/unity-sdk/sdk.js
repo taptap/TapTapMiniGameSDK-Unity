@@ -1050,7 +1050,6 @@ export default {
         tj.getSetting({
             ...config,
             success(res) {
-                formatResponse('GetSettingSuccessCallbackResult', res);
                 moduleHelper.send('GetSettingCallback', JSON.stringify({
                     callbackId, type: 'success', res: JSON.stringify(res),
                 }));
