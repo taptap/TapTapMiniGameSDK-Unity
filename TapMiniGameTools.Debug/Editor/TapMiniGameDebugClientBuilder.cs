@@ -15,7 +15,8 @@ namespace TapTapMiniGame.Editor
     public class TapMiniGameDebugClientBuilder
     {
         #region 常量
-        private const string DEBUG_SCENE_RELATIVE_PATH = "TapMiniGameTools.Debug/Client/Scenes/AppScene.unity";
+        private const string DEBUG_SCENE_RELATIVE_PATH = "TapMiniGameTools/TapApiDebug/Client/Scenes/AppScene.unity";
+        
         #endregion
 
         #region 私有变量
@@ -46,13 +47,13 @@ namespace TapTapMiniGame.Editor
         /// <returns>调试场景的完整路径</returns>
         private static string GetDebugScenePath()
         {
-            string packageRoot = GetPackageRootPath();
-            if (string.IsNullOrEmpty(packageRoot))
-            {
-                return null;
-            }
+            // string packageRoot = GetPackageRootPath();
+            // if (string.IsNullOrEmpty(packageRoot))
+            // {
+            //     return null;
+            // }
             
-            return Path.Combine(packageRoot, DEBUG_SCENE_RELATIVE_PATH).Replace("\\", "/");
+            return Path.Combine(Application.dataPath, DEBUG_SCENE_RELATIVE_PATH).Replace("\\", "/");
         }
         #endregion
 
@@ -146,16 +147,16 @@ namespace TapTapMiniGame.Editor
             Debug.Log("开始执行TapTap构建...");
             
             // 直接调用统一的构建方法，跳过验证因为已经在调用前验证过了
-            // bool buildSuccess = TapTapMiniGame.TapTapBuildWindowHelper.BuildTapTapMiniGame(false);
-            //
-            // if (buildSuccess)
-            // {
-            //     Debug.Log("TapTap构建调用完成");
-            // }
-            // else
-            // {
-            //     Debug.LogError("TapTap构建失败，请查看日志了解详情");
-            // }
+            bool buildSuccess = TapTapMiniGame.TapTapBuildWindowHelper.BuildTapTapMiniGame(false);
+            
+            if (buildSuccess)
+            {
+                Debug.Log("TapTap构建调用完成");
+            }
+            else
+            {
+                Debug.LogError("TapTap构建失败，请查看日志了解详情");
+            }
         }
 
         /// <summary>

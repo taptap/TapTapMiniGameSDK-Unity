@@ -21,7 +21,7 @@ namespace TapTapMiniGame.Editor
         /// <summary>
         /// 小游戏包的CDN下载地址
         /// </summary>
-        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/cf80923692b7807cd36be858c1e1ea38.zip";
+        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/dd914a41b377014be67646dbc5499c5c.zip";
 
         /// <summary>
         /// 本地存储的hash值的EditorPrefs键名

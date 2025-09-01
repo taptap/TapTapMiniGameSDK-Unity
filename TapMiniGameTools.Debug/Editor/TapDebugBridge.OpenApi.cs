@@ -169,26 +169,26 @@ public partial class TapDebugBridge
     /// <summary>
     /// 设置成就管理器桥接
     /// </summary>
-    public static void SetupAchievementManager(AchievementManagerOption option)
+    public static void TapAchievement_Setup(AchievementManagerOption option)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
-        string messageData = JsonMapper.ToJson(new { type = "SetupAchievementManager", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "TapAchievement_Setup", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到SetupAchievementManager回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到TapAchievement_Setup回复: {response.ToJson()}");
         });
     }
 
     /// <summary>
     /// 注册成就监听器桥接
     /// </summary>
-    public static void AchievementManager_RegisterListener(AchievementListener listener)
+    public static void TapAchievement_RegisterCallBack(AchievementListener listener)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(listener);
-        string messageData = JsonMapper.ToJson(new { type = "AchievementManager_RegisterListener", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "TapAchievement_RegisterCallBack", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到AchievementManager_RegisterListener回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到TapAchievement_RegisterCallBack回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -204,13 +204,13 @@ public partial class TapDebugBridge
     /// <summary>
     /// 取消注册成就监听器桥接
     /// </summary>
-    public static void AchievementManager_UnregisterListener(AchievementListener listener)
+    public static void TapAchievement_UnRegisterCallBack(AchievementListener listener)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(listener);
-        string messageData = JsonMapper.ToJson(new { type = "AchievementManager_UnregisterListener", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "TapAchievement_UnRegisterCallBack", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到AchievementManager_UnregisterListener回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到TapAchievement_UnRegisterCallBack回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -226,48 +226,48 @@ public partial class TapDebugBridge
     /// <summary>
     /// 解锁成就桥接
     /// </summary>
-    public static void AchievementManager_Unlock(string achievementId)
+    public static void TapAchievement_Unlock(string achievementId)
     {
-        string messageData = JsonMapper.ToJson(new { type = "AchievementManager_Unlock", param = new { achievementId = achievementId } });
+        string messageData = JsonMapper.ToJson(new { type = "TapAchievement_Unlock", param = new { achievementId = achievementId } });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到AchievementManager_Unlock回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到TapAchievement_Unlock回复: {response.ToJson()}");
         });
     }
 
     /// <summary>
     /// 增加成就步数桥接
     /// </summary>
-    public static void AchievementManager_IncrementSteps(string achievementId, int steps)
+    public static void TapAchievement_Increment(string achievementId, int steps)
     {
-        string messageData = JsonMapper.ToJson(new { type = "AchievementManager_IncrementSteps", param = new { achievementId = achievementId, steps = steps } });
+        string messageData = JsonMapper.ToJson(new { type = "TapAchievement_Increment", param = new { achievementId = achievementId, steps = steps } });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到AchievementManager_IncrementSteps回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到TapAchievement_Increment回复: {response.ToJson()}");
         });
     }
 
     /// <summary>
     /// 显示所有成就桥接
     /// </summary>
-    public static void AchievementManager_ShowAllAchievements()
+    public static void TapAchievement_ShowAchievements()
     {
-        string messageData = JsonMapper.ToJson(new { type = "AchievementManager_ShowAllAchievements" });
+        string messageData = JsonMapper.ToJson(new { type = "TapAchievement_ShowAchievements" });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到AchievementManager_ShowAllAchievements回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到TapAchievement_ShowAchievements回复: {response.ToJson()}");
         });
     }
 
     /// <summary>
     /// 设置Toast启用状态桥接
     /// </summary>
-    public static void AchievementManager_SetToastEnabled(bool enabled)
+    public static void TapAchievement_SetToastEnable(bool enabled)
     {
-        string messageData = JsonMapper.ToJson(new { type = "AchievementManager_SetToastEnabled", param = new { enabled = enabled } });
+        string messageData = JsonMapper.ToJson(new { type = "TapAchievement_SetToastEnable", param = new { enabled = enabled } });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到AchievementManager_SetToastEnabled回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到TapAchievement_SetToastEnable回复: {response.ToJson()}");
         });
     }
     #endregion
@@ -506,25 +506,25 @@ public partial class TapDebugBridge
     /// <summary>
     /// 获取排行榜管理器桥接
     /// </summary>
-    public static void GetLeaderBoardManager()
+    public static void Tap_GetLeaderBoardManager()
     {
-        string messageData = JsonMapper.ToJson(new { type = "GetLeaderBoardManager" });
+        string messageData = JsonMapper.ToJson(new { type = "Tap_GetLeaderBoardManager" });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到GetLeaderBoardManager回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到Tap_GetLeaderBoardManager回复: {response.ToJson()}");
         });
     }
 
     /// <summary>
     /// 打开排行榜桥接
     /// </summary>
-    public static void OpenLeaderboard(OpenLeaderboardOption option)
+    public static void Tap_OpenLeaderboard(OpenLeaderboardOption option)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
-        string messageData = JsonMapper.ToJson(new { type = "OpenLeaderboard", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "Tap_OpenLeaderboard", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到OpenLeaderboard回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到Tap_OpenLeaderboard回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -541,13 +541,13 @@ public partial class TapDebugBridge
     /// <summary>
     /// 提交分数桥接
     /// </summary>
-    public static void SubmitScores(SubmitScoreOption option)
+    public static void Tap_SubmitScore(SubmitScoreOption option)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
-        string messageData = JsonMapper.ToJson(new { type = "SubmitScores", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "Tap_SubmitScore", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到SubmitScores回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到Tap_SubmitScore回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -564,13 +564,13 @@ public partial class TapDebugBridge
     /// <summary>
     /// 加载排行榜分数桥接
     /// </summary>
-    public static void LoadLeaderboardScores(LoadLeaderboardScoresOption option)
+    public static void Tap_LoadLeaderboardScores(LoadLeaderboardScoresOption option)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
-        string messageData = JsonMapper.ToJson(new { type = "LoadLeaderboardScores", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "Tap_LoadLeaderboardScores", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到LoadLeaderboardScores回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到Tap_LoadLeaderboardScores回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -587,13 +587,13 @@ public partial class TapDebugBridge
     /// <summary>
     /// 加载当前玩家排行榜分数桥接
     /// </summary>
-    public static void LoadCurrentPlayerLeaderboardScore(LoadCurrentPlayerLeaderboardScoreOption option)
+    public static void Tap_LoadCurrentPlayerLeaderboardScore(LoadCurrentPlayerLeaderboardScoreOption option)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
-        string messageData = JsonMapper.ToJson(new { type = "LoadCurrentPlayerLeaderboardScore", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "Tap_LoadCurrentPlayerLeaderboardScore", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到LoadCurrentPlayerLeaderboardScore回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到Tap_LoadCurrentPlayerLeaderboardScore回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -610,13 +610,13 @@ public partial class TapDebugBridge
     /// <summary>
     /// 加载玩家为中心的分数桥接
     /// </summary>
-    public static void LoadPlayerCenteredScores(LoadPlayerCenteredScoresOption option)
+    public static void Tap_LoadPlayerCenteredScores(LoadPlayerCenteredScoresOption option)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
-        string messageData = JsonMapper.ToJson(new { type = "LoadPlayerCenteredScores", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "Tap_LoadPlayerCenteredScores", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到LoadPlayerCenteredScores回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到Tap_LoadPlayerCenteredScores回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -625,6 +625,164 @@ public partial class TapDebugBridge
                 case "fail":
                     var failResult = response.GetResult<LeaderboardFailureResponse>();
                     option.callback?.onFailure?.Invoke(failResult.code, failResult.message);
+                    break;
+            }
+        });
+    }
+    #endregion
+
+    #region 云存档
+    /// <summary>
+    /// 创建云存档管理器桥接
+    /// </summary>
+    public static void TapCloudSave_Setup()
+    {
+        string messageData = JsonMapper.ToJson(new { type = "TapCloudSave_Setup" });
+        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        {
+            Debug.Log($"[测试] 收到TapCloudSave_Setup回复: {response.ToJson()}");
+        });
+    }
+
+    /// <summary>
+    /// 创建存档桥接
+    /// </summary>
+    public static void TapCloudSave_CreateArchive(CreateArchiveOption option)
+    {
+        var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
+        string messageData = JsonMapper.ToJson(new { type = "TapCloudSave_CreateArchive", param = serializableParam });
+        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        {
+            Debug.Log($"[测试] 收到TapCloudSave_CreateArchive回复: {response.ToJson()}");
+            switch (response.status)
+            {
+                case "success":
+                    option.success?.Invoke(response.GetResult<CloudArchiveOperationResponse>());
+                    break;
+                case "fail":
+                    var failResult = response.GetResult<CloudSaveFailureResponse>();
+                    option.fail?.Invoke(failResult.message.errno, failResult.message.errMsg);
+                    break;
+                case "complete":
+                    option.complete?.Invoke(response.GetResult<TapCallbackResult>());
+                    break;
+            }
+        });
+    }
+
+    /// <summary>
+    /// 更新存档桥接
+    /// </summary>
+    public static void TapCloudSave_UpdateArchive(UpdateArchiveOption option)
+    {
+        var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
+        string messageData = JsonMapper.ToJson(new { type = "TapCloudSave_UpdateArchive", param = serializableParam });
+        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        {
+            Debug.Log($"[测试] 收到TapCloudSave_UpdateArchive回复: {response.ToJson()}");
+            switch (response.status)
+            {
+                case "success":
+                    option.success?.Invoke(response.GetResult<CloudArchiveOperationResponse>());
+                    break;
+                case "fail":
+                    var failResult = response.GetResult<CloudSaveFailureResponse>();
+                    option.fail?.Invoke(failResult.message.errno, failResult.message.errMsg);
+                    break;
+                case "complete":
+                    option.complete?.Invoke(response.GetResult<TapCallbackResult>());
+                    break;
+            }
+        });
+    }
+
+    /// <summary>
+    /// 获取存档列表桥接
+    /// </summary>
+    public static void TapCloudSave_GetArchiveList(GetArchiveListOption option)
+    {
+        var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
+        string messageData = JsonMapper.ToJson(new { type = "TapCloudSave_GetArchiveList", param = serializableParam });
+        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        {
+            Debug.Log($"[测试] 收到TapCloudSave_GetArchiveList回复: {response.ToJson()}");
+            switch (response.status)
+            {
+                case "success":
+                    option.success?.Invoke(response.GetResult<CloudArchiveListResponse>());
+                    break;
+                case "fail":
+                    var failResult = response.GetResult<CloudSaveFailureResponse>();
+                    option.fail?.Invoke(failResult.message.errno, failResult.message.errMsg);
+                    break;
+            }
+        });
+    }
+
+    /// <summary>
+    /// 获取存档数据桥接
+    /// </summary>
+    public static void TapCloudSave_GetArchiveData(GetArchiveDataOption option)
+    {
+        var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
+        string messageData = JsonMapper.ToJson(new { type = "TapCloudSave_GetArchiveData", param = serializableParam });
+        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        {
+            Debug.Log($"[测试] 收到TapCloudSave_GetArchiveData回复: {response.ToJson()}");
+            switch (response.status)
+            {
+                case "success":
+                    option.success?.Invoke(response.GetResult<CloudArchiveDataResponse>());
+                    break;
+                case "fail":
+                    var failResult = response.GetResult<CloudSaveFailureResponse>();
+                    option.fail?.Invoke(failResult.message.errno, failResult.message.errMsg);
+                    break;
+            }
+        });
+    }
+
+    /// <summary>
+    /// 获取存档封面桥接
+    /// </summary>
+    public static void TapCloudSave_GetArchiveCover(GetArchiveCoverOption option)
+    {
+        var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
+        string messageData = JsonMapper.ToJson(new { type = "TapCloudSave_GetArchiveCover", param = serializableParam });
+        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        {
+            Debug.Log($"[测试] 收到TapCloudSave_GetArchiveCover回复: {response.ToJson()}");
+            switch (response.status)
+            {
+                case "success":
+                    option.success?.Invoke(response.GetResult<CloudArchiveCoverResponse>());
+                    break;
+                case "fail":
+                    var failResult = response.GetResult<CloudSaveFailureResponse>();
+                    option.fail?.Invoke(failResult.message.errno, failResult.message.errMsg);
+                    break;
+            }
+        });
+    }
+
+    /// <summary>
+    /// 删除存档桥接
+    /// </summary>
+    public static void TapCloudSave_DeleteArchive(DeleteArchiveOption option)
+    {
+        var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
+        string messageData = JsonMapper.ToJson(new { type = "TapCloudSave_DeleteArchive", param = serializableParam });
+        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        {
+            Debug.Log($"[测试] 收到TapCloudSave_DeleteArchive回复: {response.ToJson()}");
+            switch (response.status)
+            {
+                case "success":
+                    option.success?.Invoke(response.GetResult<CloudArchiveOperationResponse>());
+                    break;
+                case "fail":
+                    var failResult = response.GetResult<CloudSaveFailureResponse>();
+                    option.fail?.Invoke(failResult.message.errno, failResult.message.errMsg);
                     break;
             }
         });

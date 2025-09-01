@@ -7,6 +7,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.9] - 2025.9.1
+
+### Added
+1. 调试客户端支持：排行榜，成就，云存档等功能
+2. BuildProfile支持点击查看tap文档
+
+### Fixed
+1. 修复音频构建bug
+2. 修复构建时CheckTapFSReady报错
+3. 修复CreateUserInfoButton缺少参数问题
+4. 修复Tap.Getsetting返回内容为空
+
 ## [2.0.8] - 2025.8.18
 
 ### Added
