@@ -209,19 +209,8 @@ namespace TapTapMiniGame
         {
             PlayerSettings.productName = this.getDataInput("projectName");
             config.ProjectConf.Appid = this.getDataInput("appid");
-            
-            // 根据首包资源加载方式设置CDN地址
-            int assetLoadType = this.getDataPop("assetLoadType");
-            if (assetLoadType == 0) // 选择了CDN
-            {
-                config.ProjectConf.CDN = this.getDataInput("cdn");
-            }
-            else // 选择了"小游戏包内"
-            {
-                config.ProjectConf.CDN = ""; // 清空CDN地址
-            }
-            
-            config.ProjectConf.assetLoadType = assetLoadType;
+            config.ProjectConf.CDN = this.getDataInput("cdn");
+            config.ProjectConf.assetLoadType = this.getDataPop("assetLoadType");
             config.ProjectConf.compressDataPackage = this.getDataCheckbox("compressDataPackage");
             config.ProjectConf.VideoUrl = this.getDataInput("videoUrl");
             config.ProjectConf.Orientation = (TJScreenOritation)this.getDataPop("orientation");
@@ -666,14 +655,7 @@ namespace TapTapMiniGame
                 settingsHelper.formIntPopup("assetLoadType", "首包资源加载方式", new[] { "CDN", "小游戏包内" }, new[] { 0, 1 });
                 settingsHelper.formCheckbox("compressDataPackage", "压缩首包资源(?)", "将首包资源Brotli压缩, 降低资源大小. 注意: 首次启动耗时可能会增加200ms, 仅推荐使用小游戏分包加载时节省包体大小使用");
                 settingsHelper.formIntPopup("orientation", "游戏方向", new[] { "纵向", "横向" }, new[] { 0, 1 });
-                
-                // 根据首包资源加载方式控制CDN地址输入框的显示和必填状态
-                int assetLoadType = settingsHelper.getDataPop("assetLoadType");
-                if (assetLoadType == 0) // 选择了CDN
-                {
-                    settingsHelper.formInput("cdn", "CDN地址", null, true); // 必填
-                }
-                // 如果选择了"小游戏包内"（值为1），则隐藏CDN输入框
+                settingsHelper.formInput("cdn", "CDN地址", null, true); // 必填
                 settingsHelper.formInput("memorySize", "预分配堆大小", "单位MB，预分配内存值，超休闲游戏256/中轻度496/重度游戏768，需预估游戏最大UnityHeap值以防止内存自动扩容带来的峰值尖刺。", true);
                 settingsHelper.formCheckbox("iOSPerformancePlus", "IOSHighPerformance+",
                     "是否在iOS平台使用 Tuanjie 小游戏宿主的高性能+渲染方案，有助于提升渲染兼容性、降低WebContent进程内存。");
