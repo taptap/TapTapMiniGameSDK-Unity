@@ -47,6 +47,7 @@ namespace TapTapMiniGame.Editor
         // 调试开关状态
         private bool isDebugEnabled;
         private bool panelDebugEnabled = false;
+        private bool enableClientBuild;
         
         // 缓存的服务器信息
         private ServerInfo cachedServerInfo;
@@ -274,32 +275,28 @@ namespace TapTapMiniGame.Editor
             );
             
             EditorGUILayout.Space(200);
-            
-            // // 构建调试客户端按钮
-            // EditorGUILayout.BeginHorizontal();
-            // GUILayout.FlexibleSpace();
-            //
-            // GUI.color = Color.cyan;
-            //
-            // if (GUILayout.Button("构建Tap小游戏调试客户端", GUILayout.Height(35), GUILayout.Width(200)))
-            // {
-            //     EditorApplication.delayCall += () => TapMiniGameDebugClientBuilder.BuildDebugClient();
-            // }
-            // GUI.color = Color.white;
-            //
-            // GUILayout.FlexibleSpace();
-            // EditorGUILayout.EndHorizontal();
-            //
-            // EditorGUILayout.Space(5);
-            //
-            // EditorGUILayout.HelpBox(
-            //     "此功能会构建独立的调试客户端，用于测试TapSDK功能。\n" +
-            //     "构建过程不会影响您当前的项目构建配置。",
-            //     MessageType.Info
-            // );
-            //
-            // EditorGUILayout.Space(20);
-            
+
+            if (enableClientBuild)
+            {
+                // 构建调试客户端按钮
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                GUI.color = Color.cyan;
+                if (GUILayout.Button("构建Tap小游戏调试客户端", GUILayout.Height(35), GUILayout.Width(200)))
+                {
+                    EditorApplication.delayCall += () => TapMiniGameDebugClientBuilder.BuildDebugClient();
+                }
+                GUI.color = Color.white;
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.Space(5);
+                EditorGUILayout.HelpBox(
+                    "此功能会构建独立的调试客户端，用于测试TapSDK功能。\n" +
+                    "构建过程不会影响您当前的项目构建配置。",
+                    MessageType.Info
+                );
+                EditorGUILayout.Space(20);
+            }
             EditorGUILayout.EndVertical();
         }
 

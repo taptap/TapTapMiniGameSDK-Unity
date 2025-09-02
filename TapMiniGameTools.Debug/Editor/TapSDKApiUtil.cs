@@ -27,7 +27,8 @@ namespace TapTapMiniGame
         {
             "success",
             "fail", 
-            "complete"
+            "complete",
+            "callback"
         };
 
         /// <summary>
