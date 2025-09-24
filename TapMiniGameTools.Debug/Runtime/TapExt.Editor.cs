@@ -107,7 +107,6 @@ namespace TapTapMiniGame
     #endregion
     
     #region 云存档
-#if TAP_CLOUDSAVE_ENABLE
     public class TapCloudSave
     {
         /// <summary>
@@ -172,7 +171,6 @@ namespace TapTapMiniGame
             TapDebugBridge.TapCloudSave_DeleteArchive(option);
         }
     }
-#endif // TAP_CLOUDSAVE_ENABLE
     #endregion
 }
 

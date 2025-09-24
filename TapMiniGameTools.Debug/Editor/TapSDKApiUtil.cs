@@ -5,6 +5,9 @@ using UnityEngine;
 using System.Collections.Generic;
 using LitJson;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Net.NetworkInformation;
 
 namespace TapTapMiniGame
 {
@@ -230,6 +233,150 @@ namespace TapTapMiniGame
             catch (Exception e)
             {
                 Debug.LogError($"[TapSDKApiUtil] Action执行异常: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 获取本地IP地址的通用静态方法
+        /// 优先级：NetworkInterface方法 > DNS方法 > 127.0.0.1
+        /// </summary>
+        /// <returns>检测到的本地IP地址</returns>
+        public static string GetLocalIPAddress()
+        {
+            // 优先级1: 尝试NetworkInterface方法
+            string networkInterfaceIP = TryGetIPFromNetworkInterface();
+            if (!string.IsNullOrEmpty(networkInterfaceIP))
+            {
+                return networkInterfaceIP;
+            }
+
+            // 优先级2: 尝试DNS方法
+            string dnsIP = TryGetIPFromDNS();
+            if (!string.IsNullOrEmpty(dnsIP))
+            {
+                return dnsIP;
+            }
+
+            // 最后fallback
+            Debug.LogError("[TapSDKApiUtil] All IP detection methods failed, using localhost");
+            return "127.0.0.1";
+        }
+
+        /// <summary>
+        /// 通过NetworkInterface获取本地IP地址
+        /// </summary>
+        /// <returns>找到的IP地址，失败时返回null</returns>
+        private static string TryGetIPFromNetworkInterface()
+        {
+            try
+            {
+                var localIPs = new List<IPAddress>();
+
+                // 遍历所有活动的网络接口
+                foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    // 只考虑运行中且非环回的接口
+                    if (ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                    {
+                        // 获取接口的IP地址信息
+                        foreach (UnicastIPAddressInformation ipInfo in ni.GetIPProperties().UnicastAddresses)
+                        {
+                            // 筛选IPv4地址
+                            if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                // 排除回环地址
+                                if (!IPAddress.IsLoopback(ipInfo.Address))
+                                {
+                                    localIPs.Add(ipInfo.Address);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (localIPs.Count > 0)
+                {
+                    // 按优先级排序选择最佳IP
+                    var selectedIP = localIPs
+                        .OrderByDescending(ip =>
+                        {
+                            var bytes = ip.GetAddressBytes();
+                            // 优先级：192.168.x.x > 10.x.x.x > 172.16-31.x.x > 其他
+                            if (bytes[0] == 192 && bytes[1] == 168) return 3;
+                            if (bytes[0] == 10) return 2;
+                            if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return 1;
+                            return 0;
+                        })
+                        .First();
+
+                    string ipAddress = selectedIP.ToString();
+                    Debug.Log($"[TapSDKApiUtil] NetworkInterface method found IP: {ipAddress}");
+
+                    // 如果找到多个IP，记录所有找到的IP
+                    if (localIPs.Count > 1)
+                    {
+                        string allIPs = string.Join(", ", localIPs.Select(ip => ip.ToString()));
+                        Debug.Log($"[TapSDKApiUtil] Available IPs: {allIPs}, selected: {ipAddress}");
+                    }
+
+                    return ipAddress;
+                }
+
+                Debug.LogWarning("[TapSDKApiUtil] NetworkInterface method: No valid IP addresses found");
+                return null;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[TapSDKApiUtil] NetworkInterface method failed: {e.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 通过DNS获取本地IP地址
+        /// </summary>
+        /// <returns>找到的IP地址，失败时返回null</returns>
+        private static string TryGetIPFromDNS()
+        {
+            try
+            {
+                // 优化的DNS方法，增加更好的错误处理
+                string hostname = Environment.MachineName;
+                if (string.IsNullOrEmpty(hostname))
+                {
+                    hostname = Dns.GetHostName();
+                }
+
+                Debug.Log($"[TapSDKApiUtil] DNS method trying to resolve hostname: {hostname}");
+
+                var hostEntry = Dns.GetHostEntry(hostname);
+                var dnsIPs = hostEntry.AddressList
+                    .Where(ip => ip.AddressFamily == AddressFamily.InterNetwork)
+                    .Where(ip => !IPAddress.IsLoopback(ip))
+                    .OrderByDescending(ip =>
+                    {
+                        var bytes = ip.GetAddressBytes();
+                        if (bytes[0] == 192 && bytes[1] == 168) return 3;
+                        if (bytes[0] == 10) return 2;
+                        if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return 1;
+                        return 0;
+                    })
+                    .ToList();
+
+                if (dnsIPs.Any())
+                {
+                    string ipAddress = dnsIPs.First().ToString();
+                    Debug.Log($"[TapSDKApiUtil] DNS method found IP: {ipAddress}");
+                    return ipAddress;
+                }
+
+                Debug.LogWarning("[TapSDKApiUtil] DNS method: No valid IP addresses found in DNS resolution");
+                return null;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[TapSDKApiUtil] DNS method failed: {e.Message}");
+                return null;
             }
         }
     }

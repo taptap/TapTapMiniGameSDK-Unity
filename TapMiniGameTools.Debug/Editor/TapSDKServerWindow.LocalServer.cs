@@ -21,7 +21,7 @@ namespace TapTapMiniGame.Editor
         /// <summary>
         /// 小游戏包的CDN下载地址
         /// </summary>
-        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/dd914a41b377014be67646dbc5499c5c.zip";
+        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/fe7a3ccd4b010a20a7e74fda346e9897.zip";
 
         /// <summary>
         /// 本地存储的hash值的EditorPrefs键名
@@ -188,42 +188,8 @@ namespace TapTapMiniGame.Editor
 
         private void GetLocalIPAddress()
         {
-            try
-            {
-                // 获取本机所有网络接口
-                var host = Dns.GetHostEntry(Dns.GetHostName());
-                
-                // 优先选择192.168.x.x或10.x.x.x的内网IP
-                var localIPs = host.AddressList
-                    .Where(ip => ip.AddressFamily == AddressFamily.InterNetwork)
-                    .Where(ip => !IPAddress.IsLoopback(ip))
-                    .OrderByDescending(ip => 
-                    {
-                        var bytes = ip.GetAddressBytes();
-                        // 优先级：192.168.x.x > 10.x.x.x > 172.16-31.x.x > 其他
-                        if (bytes[0] == 192 && bytes[1] == 168) return 3;
-                        if (bytes[0] == 10) return 2;
-                        if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return 1;
-                        return 0;
-                    })
-                    .ToList();
-
-                if (localIPs.Any())
-                {
-                    localIP = localIPs.First().ToString();
-                    Debug.Log($"Local IP: {localIP}");
-                }
-                else
-                {
-                    localIP = "127.0.0.1";
-                    Debug.LogWarning("Could not find local network IP, using localhost");
-                }
-            }
-            catch (Exception e)
-            {
-                localIP = "127.0.0.1";
-                Debug.LogError($"Error getting local IP: {e.Message}");
-            }
+            // 使用TapSDKApiUtil中的优化IP获取方法
+            localIP = TapSDKApiUtil.GetLocalIPAddress();
         }
 
         private void LoadGameJson()

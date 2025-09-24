@@ -194,9 +194,12 @@ namespace TapServer
             // 绑定事件
             SubscribeToServerEvents();
 
+            // 重置同步缓存
+            TapTapMiniGame.TapSyncCache.ResetCache();
+            
             if (enableDebugLog)
             {
-                Debug.Log($"[TapSDK开发服务器] 初始化完成，端口: {serverPort}");
+                Debug.Log($"[TapSDK开发服务器] 初始化完成，端口: {serverPort}，TapEnv数据缓存已重置");
             }
         }
 
@@ -291,6 +294,7 @@ namespace TapServer
                 webSocketServer.OnMessageReceived -= HandleMessageReceived;
             }
         }
+        
 
         #endregion
 
@@ -481,7 +485,323 @@ namespace TapServer
             {
                 Debug.Log($"[TapSDK开发服务器] 🔗 客户端连接: {clientIP} (总连接数: {clientIds.Count})");
             }
+            
+            // 延迟启动客户端数据同步流程
+            StartCoroutine(InitializeClientDataSync(clientId));
+            
             OnClientConnected?.Invoke(clientId, clientIP);
+        }
+        
+        /// <summary>
+        /// 初始化客户端数据同步流程 - 统一管理所有同步API
+        /// </summary>
+        private System.Collections.IEnumerator InitializeClientDataSync(string clientId)
+        {
+            // 等待连接稳定
+            yield return new WaitForSeconds(1.0f);
+            
+            if (enableDebugLog)
+            {
+                Debug.Log($"[TapSDK开发服务器] 🔄 开始客户端数据同步流程 {clientId}");
+            }
+            
+            // 同步TapEnv数据
+            yield return StartCoroutine(RequestTapEnvData(clientId));
+            
+            // 同步SystemInfo数据
+            yield return StartCoroutine(RequestSystemInfoData(clientId));
+            
+            // 同步SystemSetting数据
+            yield return StartCoroutine(RequestSystemSettingData(clientId));
+            
+            // 同步WindowInfo数据
+            yield return StartCoroutine(RequestWindowInfoData(clientId));
+            
+            // 同步DeviceInfo数据
+            yield return StartCoroutine(RequestDeviceInfoData(clientId));
+            
+            // 同步AppBaseInfo数据
+            yield return StartCoroutine(RequestAppBaseInfoData(clientId));
+            
+            // 同步AppAuthorizeSetting数据
+            yield return StartCoroutine(RequestAppAuthorizeSettingData(clientId));
+            
+            // 同步BatteryInfo数据
+            yield return StartCoroutine(RequestBatteryInfoData(clientId));
+            
+            if (enableDebugLog)
+            {
+                Debug.Log($"[TapSDK开发服务器] ✅ 客户端数据同步流程完成 {clientId}");
+            }
+        }
+        
+        /// <summary>
+        /// 向客户端请求TapEnv数据同步
+        /// </summary>
+        private System.Collections.IEnumerator RequestTapEnvData(string clientId)
+        {
+            try
+            {
+                var requestMessage = new
+                {
+                    type = "SyncTapEnv",
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
+                
+                string messageData = JsonMapper.ToJson(requestMessage);
+                
+                // 发送请求
+                SendMessage(messageData, (responseClientId, response) =>
+                {
+                    // 直接在这里处理TapEnv数据更新
+                    HandleTapEnvDataUpdate(responseClientId, response);
+                });
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] 📤 Requested TapEnv data from new client {clientId}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Failed to request TapEnv data from client {clientId}: {e.Message}");
+            }
+            
+            yield return null;
+        }
+        
+        /// <summary>
+        /// 向客户端请求SystemInfo数据同步
+        /// </summary>
+        private System.Collections.IEnumerator RequestSystemInfoData(string clientId)
+        {
+            try
+            {
+                var requestMessage = new
+                {
+                    type = "SyncSystemInfo",
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
+                
+                string messageData = JsonMapper.ToJson(requestMessage);
+                
+                // 发送请求
+                SendMessage(messageData, (responseClientId, response) =>
+                {
+                    // 直接在这里处理SystemInfo数据更新
+                    HandleSystemInfoDataUpdate(responseClientId, response);
+                });
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] 📤 Requested SystemInfo data from new client {clientId}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Failed to request SystemInfo data from client {clientId}: {e.Message}");
+            }
+            
+            yield return null;
+        }
+
+        /// <summary>
+        /// 向客户端请求SystemSetting数据同步
+        /// </summary>
+        private System.Collections.IEnumerator RequestSystemSettingData(string clientId)
+        {
+            try
+            {
+                var requestMessage = new
+                {
+                    type = "SyncSystemSetting",
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
+                
+                string messageData = JsonMapper.ToJson(requestMessage);
+                
+                // 发送请求
+                SendMessage(messageData, (responseClientId, response) =>
+                {
+                    HandleSystemSettingDataUpdate(responseClientId, response);
+                });
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] 📤 Requested SystemSetting data from new client {clientId}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Failed to request SystemSetting data from client {clientId}: {e.Message}");
+            }
+            
+            yield return null;
+        }
+
+        /// <summary>
+        /// 向客户端请求WindowInfo数据同步
+        /// </summary>
+        private System.Collections.IEnumerator RequestWindowInfoData(string clientId)
+        {
+            try
+            {
+                var requestMessage = new
+                {
+                    type = "SyncWindowInfo",
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
+                
+                string messageData = JsonMapper.ToJson(requestMessage);
+                
+                SendMessage(messageData, (responseClientId, response) =>
+                {
+                    HandleWindowInfoDataUpdate(responseClientId, response);
+                });
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] 📤 Requested WindowInfo data from new client {clientId}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Failed to request WindowInfo data from client {clientId}: {e.Message}");
+            }
+            
+            yield return null;
+        }
+
+        /// <summary>
+        /// 向客户端请求DeviceInfo数据同步
+        /// </summary>
+        private System.Collections.IEnumerator RequestDeviceInfoData(string clientId)
+        {
+            try
+            {
+                var requestMessage = new
+                {
+                    type = "SyncDeviceInfo",
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
+                
+                string messageData = JsonMapper.ToJson(requestMessage);
+                
+                SendMessage(messageData, (responseClientId, response) =>
+                {
+                    HandleDeviceInfoDataUpdate(responseClientId, response);
+                });
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] 📤 Requested DeviceInfo data from new client {clientId}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Failed to request DeviceInfo data from client {clientId}: {e.Message}");
+            }
+            
+            yield return null;
+        }
+
+        /// <summary>
+        /// 向客户端请求AppBaseInfo数据同步
+        /// </summary>
+        private System.Collections.IEnumerator RequestAppBaseInfoData(string clientId)
+        {
+            try
+            {
+                var requestMessage = new
+                {
+                    type = "SyncAppBaseInfo",
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
+                
+                string messageData = JsonMapper.ToJson(requestMessage);
+                
+                SendMessage(messageData, (responseClientId, response) =>
+                {
+                    HandleAppBaseInfoDataUpdate(responseClientId, response);
+                });
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] 📤 Requested AppBaseInfo data from new client {clientId}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Failed to request AppBaseInfo data from client {clientId}: {e.Message}");
+            }
+            
+            yield return null;
+        }
+
+        /// <summary>
+        /// 向客户端请求AppAuthorizeSetting数据同步
+        /// </summary>
+        private System.Collections.IEnumerator RequestAppAuthorizeSettingData(string clientId)
+        {
+            try
+            {
+                var requestMessage = new
+                {
+                    type = "SyncAppAuthorizeSetting",
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
+                
+                string messageData = JsonMapper.ToJson(requestMessage);
+                
+                SendMessage(messageData, (responseClientId, response) =>
+                {
+                    HandleAppAuthorizeSettingDataUpdate(responseClientId, response);
+                });
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] 📤 Requested AppAuthorizeSetting data from new client {clientId}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Failed to request AppAuthorizeSetting data from client {clientId}: {e.Message}");
+            }
+            
+            yield return null;
+        }
+
+        /// <summary>
+        /// 向客户端请求BatteryInfo数据同步
+        /// </summary>
+        private System.Collections.IEnumerator RequestBatteryInfoData(string clientId)
+        {
+            try
+            {
+                var requestMessage = new
+                {
+                    type = "SyncBatteryInfo",
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
+                
+                string messageData = JsonMapper.ToJson(requestMessage);
+                
+                SendMessage(messageData, (responseClientId, response) =>
+                {
+                    HandleBatteryInfoDataUpdate(responseClientId, response);
+                });
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] 📤 Requested BatteryInfo data from new client {clientId}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Failed to request BatteryInfo data from client {clientId}: {e.Message}");
+            }
+            
+            yield return null;
         }
 
         private void HandleClientDisconnected(string clientId)
@@ -518,6 +838,7 @@ namespace TapServer
                         {
                             Debug.Log($"[TapSDK开发服务器] 收到消息类型: {messageType}");
                         }
+                        
 
                         // 创建ResponseData对象用于回调
                         ResponseData responseData = new ResponseData();
@@ -726,6 +1047,344 @@ namespace TapServer
             GUILayout.EndArea();
         }
 
+        /// <summary>
+        /// 处理TapEnv数据更新消息
+        /// </summary>
+        private void HandleTapEnvDataUpdate(string clientId, ResponseData responseData)
+        {
+            try
+            {
+                if (responseData.status == "success")
+                {
+                    if (!string.IsNullOrEmpty(responseData.resultJson))
+                    {
+                        // 直接获取USER_DATA_PATH字符串，去除JSON序列化的引号
+                        string userDataPath = responseData.resultJson.Trim('"');
+                        
+                        // 更新缓存的env数据
+                        TapTapMiniGame.TapSyncCache.UpdateCache(userDataPath);
+                        
+                        if (enableDebugLog)
+                        {
+                            Debug.Log($"[TapSDK开发服务器] 📥 Updated TapEnv data from client {clientId}");
+                            Debug.Log($"[TapSDK开发服务器] USER_DATA_PATH: {userDataPath}");
+                        }
+                    }
+                    else
+                    {
+                        LogError($"TapEnv data update message missing resultData field from client {clientId}");
+                    }
+                }
+                else
+                {
+                    LogError($"Client {clientId} failed to provide TapEnv data: {responseData.status}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Error processing TapEnv data update from client {clientId}: {e.Message}");
+                LogError($"Response data: {responseData.ToJson()}");
+            }
+        }
+        
+        /// <summary>
+        /// 处理SystemInfo数据更新消息
+        /// </summary>
+        private void HandleSystemInfoDataUpdate(string clientId, ResponseData responseData)
+        {
+            try
+            {
+                if (responseData.status == "success")
+                {
+                    if (!string.IsNullOrEmpty(responseData.resultJson))
+                    {
+                        // 解析SystemInfo JSON数据
+                        var systemInfo = responseData.GetResult<TapTapMiniGame.SystemInfo>();
+                        if (systemInfo != null)
+                        {
+                            // 更新缓存的SystemInfo数据
+                            TapTapMiniGame.TapSyncCache.UpdateSystemInfoCache(systemInfo);
+                            
+                            if (enableDebugLog)
+                            {
+                                Debug.Log($"[TapSDK开发服务器] 📥 Updated SystemInfo data from client {clientId}");
+                                Debug.Log($"[TapSDK开发服务器] Platform: {systemInfo.platform}, Brand: {systemInfo.brand}");
+                            }
+                        }
+                        else
+                        {
+                            LogError($"Failed to parse SystemInfo data from client {clientId}");
+                        }
+                    }
+                    else
+                    {
+                        LogError($"SystemInfo data update message missing resultData field from client {clientId}");
+                    }
+                }
+                else
+                {
+                    LogError($"Client {clientId} failed to provide SystemInfo data: {responseData.status}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Error processing SystemInfo data update from client {clientId}: {e.Message}");
+                LogError($"Response data: {responseData.ToJson()}");
+            }
+        }
+
+        /// <summary>
+        /// 处理SystemSetting数据更新
+        /// </summary>
+        private void HandleSystemSettingDataUpdate(string clientId, ResponseData responseData)
+        {
+            try
+            {
+                if (responseData.status == "success")
+                {
+                    if (!string.IsNullOrEmpty(responseData.resultJson))
+                    {
+                        var systemSetting = responseData.GetResult<TapTapMiniGame.SystemSetting>();
+                        if (systemSetting != null)
+                        {
+                            TapTapMiniGame.TapSyncCache.UpdateSystemSettingCache(systemSetting);
+                            
+                            if (enableDebugLog)
+                            {
+                                Debug.Log($"[TapSDK开发服务器] 📥 Updated SystemSetting data from client {clientId}");
+                            }
+                        }
+                        else
+                        {
+                            LogError($"Failed to parse SystemSetting data from client {clientId}");
+                        }
+                    }
+                    else
+                    {
+                        LogError($"SystemSetting data update message missing resultData field from client {clientId}");
+                    }
+                }
+                else
+                {
+                    LogError($"Client {clientId} failed to provide SystemSetting data: {responseData.status}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Error processing SystemSetting data update from client {clientId}: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 处理WindowInfo数据更新
+        /// </summary>
+        private void HandleWindowInfoDataUpdate(string clientId, ResponseData responseData)
+        {
+            try
+            {
+                if (responseData.status == "success")
+                {
+                    if (!string.IsNullOrEmpty(responseData.resultJson))
+                    {
+                        var windowInfo = responseData.GetResult<TapTapMiniGame.WindowInfo>();
+                        if (windowInfo != null)
+                        {
+                            TapTapMiniGame.TapSyncCache.UpdateWindowInfoCache(windowInfo);
+                            
+                            if (enableDebugLog)
+                            {
+                                Debug.Log($"[TapSDK开发服务器] 📥 Updated WindowInfo data from client {clientId}");
+                            }
+                        }
+                        else
+                        {
+                            LogError($"Failed to parse WindowInfo data from client {clientId}");
+                        }
+                    }
+                    else
+                    {
+                        LogError($"WindowInfo data update message missing resultData field from client {clientId}");
+                    }
+                }
+                else
+                {
+                    LogError($"Client {clientId} failed to provide WindowInfo data: {responseData.status}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Error processing WindowInfo data update from client {clientId}: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 处理DeviceInfo数据更新
+        /// </summary>
+        private void HandleDeviceInfoDataUpdate(string clientId, ResponseData responseData)
+        {
+            try
+            {
+                if (responseData.status == "success")
+                {
+                    if (!string.IsNullOrEmpty(responseData.resultJson))
+                    {
+                        var deviceInfo = responseData.GetResult<TapTapMiniGame.DeviceInfo>();
+                        if (deviceInfo != null)
+                        {
+                            TapTapMiniGame.TapSyncCache.UpdateDeviceInfoCache(deviceInfo);
+                            
+                            if (enableDebugLog)
+                            {
+                                Debug.Log($"[TapSDK开发服务器] 📥 Updated DeviceInfo data from client {clientId}");
+                            }
+                        }
+                        else
+                        {
+                            LogError($"Failed to parse DeviceInfo data from client {clientId}");
+                        }
+                    }
+                    else
+                    {
+                        LogError($"DeviceInfo data update message missing resultData field from client {clientId}");
+                    }
+                }
+                else
+                {
+                    LogError($"Client {clientId} failed to provide DeviceInfo data: {responseData.status}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Error processing DeviceInfo data update from client {clientId}: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 处理AppBaseInfo数据更新
+        /// </summary>
+        private void HandleAppBaseInfoDataUpdate(string clientId, ResponseData responseData)
+        {
+            try
+            {
+                if (responseData.status == "success")
+                {
+                    if (!string.IsNullOrEmpty(responseData.resultJson))
+                    {
+                        var appBaseInfo = responseData.GetResult<TapTapMiniGame.AppBaseInfo>();
+                        if (appBaseInfo != null)
+                        {
+                            TapTapMiniGame.TapSyncCache.UpdateAppBaseInfoCache(appBaseInfo);
+                            
+                            if (enableDebugLog)
+                            {
+                                Debug.Log($"[TapSDK开发服务器] 📥 Updated AppBaseInfo data from client {clientId}");
+                            }
+                        }
+                        else
+                        {
+                            LogError($"Failed to parse AppBaseInfo data from client {clientId}");
+                        }
+                    }
+                    else
+                    {
+                        LogError($"AppBaseInfo data update message missing resultData field from client {clientId}");
+                    }
+                }
+                else
+                {
+                    LogError($"Client {clientId} failed to provide AppBaseInfo data: {responseData.status}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Error processing AppBaseInfo data update from client {clientId}: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 处理AppAuthorizeSetting数据更新
+        /// </summary>
+        private void HandleAppAuthorizeSettingDataUpdate(string clientId, ResponseData responseData)
+        {
+            try
+            {
+                if (responseData.status == "success")
+                {
+                    if (!string.IsNullOrEmpty(responseData.resultJson))
+                    {
+                        var appAuthorizeSetting = responseData.GetResult<TapTapMiniGame.AppAuthorizeSetting>();
+                        if (appAuthorizeSetting != null)
+                        {
+                            TapTapMiniGame.TapSyncCache.UpdateAppAuthorizeSettingCache(appAuthorizeSetting);
+                            
+                            if (enableDebugLog)
+                            {
+                                Debug.Log($"[TapSDK开发服务器] 📥 Updated AppAuthorizeSetting data from client {clientId}");
+                            }
+                        }
+                        else
+                        {
+                            LogError($"Failed to parse AppAuthorizeSetting data from client {clientId}");
+                        }
+                    }
+                    else
+                    {
+                        LogError($"AppAuthorizeSetting data update message missing resultData field from client {clientId}");
+                    }
+                }
+                else
+                {
+                    LogError($"Client {clientId} failed to provide AppAuthorizeSetting data: {responseData.status}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Error processing AppAuthorizeSetting data update from client {clientId}: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 处理BatteryInfo数据更新
+        /// </summary>
+        private void HandleBatteryInfoDataUpdate(string clientId, ResponseData responseData)
+        {
+            try
+            {
+                if (responseData.status == "success")
+                {
+                    if (!string.IsNullOrEmpty(responseData.resultJson))
+                    {
+                        var batteryInfo = responseData.GetResult<TapTapMiniGame.GetBatteryInfoSyncResult>();
+                        if (batteryInfo != null)
+                        {
+                            TapTapMiniGame.TapSyncCache.UpdateBatteryInfoCache(batteryInfo);
+                            
+                            if (enableDebugLog)
+                            {
+                                Debug.Log($"[TapSDK开发服务器] 📥 Updated BatteryInfo data from client {clientId}");
+                            }
+                        }
+                        else
+                        {
+                            LogError($"Failed to parse BatteryInfo data from client {clientId}");
+                        }
+                    }
+                    else
+                    {
+                        LogError($"BatteryInfo data update message missing resultData field from client {clientId}");
+                    }
+                }
+                else
+                {
+                    LogError($"Client {clientId} failed to provide BatteryInfo data: {responseData.status}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"Error processing BatteryInfo data update from client {clientId}: {e.Message}");
+            }
+        }
+        
         #endregion
     }
     
