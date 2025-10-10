@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [2.0.14] - 2025.9.24
+### Added
+1. 新增多人对战模块
+
+## [2.0.14] - 2025.9.24
 ### Fixed
 1. 修复成就注册事件报错bug
 
@@ -26,7 +30,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [2.0.10] - 2025.9.2
 ### Fixed
 1. dev tools去掉离线模式参数
-
 
 ## [2.0.9] - 2025.9.1
 
