@@ -717,10 +717,10 @@ var TapBattleLibrary = {
 
     Tap_Battle_KickRoomPlayer: function (str, callbackId) {
         try {
-            const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
+            const playerId = _TJPointer_stringify_adaptor(str);
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             window._tapOnlineBattleManager.kickRoomPlayer(_Tap_ContactCommonCallback({
-                playerId: args.player_id
+                playerId: playerId
             }, callbackIdStr));
         } catch (error) {
             console.error("[TapBattle] Error in Tap_Battle_KickRoomPlayer:", error.message || "Unknown error");

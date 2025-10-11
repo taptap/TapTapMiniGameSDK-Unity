@@ -45,20 +45,20 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 登录参数验证响应 - 对应Native TapSdkOnlineBattleSignIn返回值
+    /// 登录响应
     /// </summary>
     [Preserve]
     [System.Serializable]
     public class SignInValidationResponse
     {
         /// <summary>
-        /// 参数验证结果码
-        /// 0 = 参数正确（不代表登录成功，实际结果通过EventHandler回调）
-        /// -1 = 参数错误
+        /// 结果码
+        /// 0 = 成功
+        /// -1 = 失败
         /// -2 = 未初始化
         /// </summary>
         public int result_code;
-        
+
         /// <summary>
         /// 消息
         /// </summary>
@@ -89,17 +89,17 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 登出参数验证响应 - 对应Native TapSdkOnlineBattleSignOut返回值
+    /// 登出响应
     /// </summary>
     [Preserve]
     [System.Serializable]
     public class SignOutValidationResponse
     {
         /// <summary>
-        /// 参数验证结果码 (0=正确, -1=参数错误, -2=未初始化)
+        /// 结果码 (0=成功, -1=失败, -2=未初始化)
         /// </summary>
         public int result_code;
-        
+
         /// <summary>
         /// 消息
         /// </summary>
@@ -107,17 +107,17 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 房间操作参数验证响应 - 对应Native房间相关API返回值
+    /// 房间操作响应
     /// </summary>
     [Preserve]
     [System.Serializable]
     public class RoomValidationResponse
     {
         /// <summary>
-        /// 参数验证结果码 (0=正确, -1=参数错误, -2=未初始化)
+        /// 结果码 (0=成功, -1=失败, -2=未初始化)
         /// </summary>
         public int result_code;
-        
+
         /// <summary>
         /// 消息
         /// </summary>
@@ -125,17 +125,17 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 更新操作参数验证响应 - 对应Native更新相关API返回值
+    /// 更新操作响应
     /// </summary>
     [Preserve]
     [System.Serializable]
     public class UpdateValidationResponse
     {
         /// <summary>
-        /// 参数验证结果码 (0=正确, -1=参数错误, -2=未初始化)
+        /// 结果码 (0=成功, -1=失败, -2=未初始化)
         /// </summary>
         public int result_code;
-        
+
         /// <summary>
         /// 消息
         /// </summary>
@@ -143,17 +143,17 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 对战操作参数验证响应 - 对应Native对战相关API返回值
+    /// 对战操作响应
     /// </summary>
     [Preserve]
     [System.Serializable]
     public class BattleValidationResponse
     {
         /// <summary>
-        /// 参数验证结果码 (0=正确, -1=参数错误, -2=未初始化)
+        /// 结果码 (0=成功, -1=失败, -2=未初始化)
         /// </summary>
         public int result_code;
-        
+
         /// <summary>
         /// 消息
         /// </summary>
