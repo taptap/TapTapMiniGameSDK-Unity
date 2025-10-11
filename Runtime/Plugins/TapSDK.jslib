@@ -868,9 +868,6 @@ var TapBattleLibrary = {
                 
                 if (callbackIds.playerEnterRoom) {
                     listenerConfig.playerEnterRoom = (info) => {
-                        if (info.playerInfo && info.playerInfo.id) {
-                            lastEnteredPlayerId = info.playerInfo.id;
-                        }
                         console.log("[TapBattle] playerEnterRoom:", JSON.stringify(info, null, 2));
                         _Tap_JSCallback(callbackIds.playerEnterRoom, "success", info);
                     };
