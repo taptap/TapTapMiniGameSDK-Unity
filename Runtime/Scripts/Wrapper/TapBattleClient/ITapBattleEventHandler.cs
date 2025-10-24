@@ -25,9 +25,9 @@ namespace TapTapMiniGame
         public void OnBattleServiceError(BattleServiceErrorInfo info);
 
         /// <summary>
-        /// 房间自定义属性变更通知
+        /// 房间属性变更通知
         /// </summary>
-        public void OnRoomCustomPropertiesChange(RoomCustomPropertiesChangeInfo info);
+        public void OnRoomPropertiesChange(RoomPropertiesChangeInfo info);
 
         /// <summary>
         /// 玩家自定义属性变更通知

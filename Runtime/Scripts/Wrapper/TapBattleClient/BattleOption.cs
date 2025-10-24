@@ -167,7 +167,7 @@ namespace TapTapMiniGame
     public class KickRoomPlayerOption
     {
         /// <summary>
-        /// player_id
+        /// playerId
         /// </summary>
         public string playerId;
 

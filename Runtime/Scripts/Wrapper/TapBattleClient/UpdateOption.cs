@@ -152,15 +152,6 @@ namespace TapTapMiniGame
         public string name;
         
         /// <summary>
-        /// 房间自定义属性（utf8字符串，最大2048字节）
-        /// 注意：这个字段已废弃，请使用data.customProperties
-        /// </summary>
-        [System.NonSerialized]
-        public string customProperties;
-        
-        // === 立即回调（对应Native返回值）===
-        
-        /// <summary>
         /// 参数验证成功回调 - 对应Native返回0
         /// </summary>
         [System.NonSerialized]

@@ -21,7 +21,7 @@ namespace TapTapMiniGame.Editor
         /// <summary>
         /// 小游戏包的CDN下载地址
         /// </summary>
-        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/523db7a177ae7d0cbbd1460a4a5c29ff.zip";
+        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/20ab3af9b7cf636fb1a1b5235a8b4a53.zip";
 
         /// <summary>
         /// 本地存储的hash值的EditorPrefs键名
@@ -134,6 +134,21 @@ namespace TapTapMiniGame.Editor
         /// 默认首页
         /// </summary>
         private const string DEFAULT_PAGE = "index.html";
+        
+        /// <summary>
+        /// 用户构建配置列表
+        /// </summary>
+        private List<BuildProfileInfo> userBuildProfiles = new List<BuildProfileInfo>();
+        
+        /// <summary>
+        /// 当前选中的构建配置索引
+        /// </summary>
+        private int selectedProfileIndex = 0;
+        
+        /// <summary>
+        /// 当前选中的构建输出路径
+        /// </summary>
+        private string currentUserDstPath = "";
         #endregion
 
         #region 初始化
@@ -172,6 +187,7 @@ namespace TapTapMiniGame.Editor
             Debug.Log($"Server root path: {serverRootPath}");
             
             GetLocalIPAddress();
+            LoadUserBuildProfiles();
             CheckLocalFiles();
         }
 
@@ -191,12 +207,94 @@ namespace TapTapMiniGame.Editor
             // 使用TapSDKApiUtil中的优化IP获取方法
             localIP = TapSDKApiUtil.GetLocalIPAddress();
         }
+        
+        /// <summary>
+        /// 加载用户的构建配置
+        /// </summary>
+        private void LoadUserBuildProfiles()
+        {
+            try
+            {
+                // 使用共享工具类加载所有 TapTap 构建配置
+                userBuildProfiles = TapMiniGameConfigHelper.LoadAllBuildProfiles();
+                
+                if (userBuildProfiles.Count > 0)
+                {
+                    // 默认选择第一个配置
+                    selectedProfileIndex = 0;
+                    currentUserDstPath = userBuildProfiles[0].dstPath;
+                    LoadUserGameJson();
+                }
+                else
+                {
+                    Debug.LogError("No user build profiles found. Please build your game first!");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error loading user build profiles: {e.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 从用户的构建输出加载 game.json
+        /// </summary>
+        private void LoadUserGameJson()
+        {
+            if (string.IsNullOrEmpty(currentUserDstPath))
+            {
+                Debug.LogError("Current DST path is empty. Build configuration is invalid!");
+                return;
+            }
+            
+            try
+            {
+                // 使用共享工具类从 DST 路径加载游戏信息
+                gameInfo = TapMiniGameConfigHelper.LoadGameInfoFromDst(currentUserDstPath);
+                
+                if (gameInfo != null && !string.IsNullOrEmpty(gameInfo.appId))
+                {
+                    string profileName = userBuildProfiles.Count > 0 && selectedProfileIndex < userBuildProfiles.Count ? 
+                        userBuildProfiles[selectedProfileIndex].profileName : "Unknown";
+                    Debug.Log($"User game info loaded from [{profileName}]: appId={gameInfo.appId}, productName={gameInfo.productName}");
+                }
+                else
+                {
+                    Debug.LogError($"Failed to load game info from: {currentUserDstPath}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error loading user game info: {e.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 当用户切换构建配置时调用
+        /// </summary>
+        private void OnUserProfileSelectionChanged(int newIndex)
+        {
+            if (newIndex >= 0 && newIndex < userBuildProfiles.Count && newIndex != selectedProfileIndex)
+            {
+                selectedProfileIndex = newIndex;
+                currentUserDstPath = userBuildProfiles[selectedProfileIndex].dstPath;
+                
+                // 重新加载游戏信息
+                LoadUserGameJson();
+                
+                // 如果二维码已生成，需要重新生成
+                if (showLocalQRCode)
+                {
+                    GenerateLocalQRCode();
+                }
+            }
+        }
 
         private void LoadGameJson()
         {
             try
             {
-                // 从minigame目录读取game.json
+                // 从minigame目录读取game.json（示例游戏，已废弃）
                 string localPath = Path.Combine(Application.dataPath, "..", DEBUG_DIR);
                 string gameJsonPath = Path.Combine(localPath, "minigame", "game.json");
                 
@@ -210,7 +308,7 @@ namespace TapTapMiniGame.Editor
                 }
                 else
                 {
-                    Debug.LogWarning($"game.json not found at: {gameJsonPath}");
+                    Debug.Log($"game.json not found at: {gameJsonPath}");
                 }
             }
             catch (Exception e)
@@ -246,15 +344,15 @@ namespace TapTapMiniGame.Editor
             else
             {
                 downloadStatus = "本地文件已是最新";
-                // 如果文件存在且hash匹配，加载游戏信息并启动服务器
-                LoadGameJson();
+                // 如果示例游戏已存在且用户有有效的 gameInfo，启动服务器
                 if (gameInfo != null && !string.IsNullOrEmpty(gameInfo.appId))
                 {
+                    Debug.Log($"示例游戏已存在，使用用户 appId: {gameInfo.appId} 启动服务器");
                     StartLocalServer();
                 }
                 else
                 {
-                    Debug.LogError("Failed to load game info after checking local files");
+                    Debug.LogError("无法启动服务器：未找到有效的 gameInfo。请先构建你的游戏或刷新配置。");
                 }
             }
         }
@@ -324,16 +422,17 @@ namespace TapTapMiniGame.Editor
 
                     downloadStatus = "下载完成";
 
-                    // 加载游戏信息
-                    LoadGameJson();
+                    // 下载完成后启动本地服务器
+                    // 注意：使用用户的 gameInfo.appId（已从 LoadUserBuildProfiles 加载）
+                    // 但 package URL 指向本地下载的示例游戏包
                     if (gameInfo != null && !string.IsNullOrEmpty(gameInfo.appId))
                     {
-                        // 启动服务器
+                        Debug.Log($"示例游戏下载完成，使用用户 appId: {gameInfo.appId} 生成调试链接");
                         StartLocalServer();
                     }
                     else
                     {
-                        Debug.LogError("Failed to load game info after download");
+                        Debug.LogError("无法生成调试链接：未找到有效的 gameInfo。请先构建你的游戏或刷新配置。");
                     }
                 }
                 else
@@ -590,7 +689,7 @@ namespace TapTapMiniGame.Editor
             }
             else
             {
-                Debug.LogWarning($"game.zip not found at: {zipPath}");
+                Debug.LogError($"game.zip not found at: {zipPath}");
                 await ServeNotFound(stream, "game.zip");
             }
         }
@@ -615,7 +714,7 @@ namespace TapTapMiniGame.Editor
             await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
             await stream.FlushAsync();
             
-            Debug.LogWarning($"404 Not Found: {path}");
+            Debug.Log($"404 Not Found: {path}");
         }
 
         private async Task ServeOptions(NetworkStream stream)
@@ -686,7 +785,7 @@ namespace TapTapMiniGame.Editor
                 }
                 else
                 {
-                    Debug.LogWarning("Local server URL is empty, skipping scene_param");
+                    Debug.Log("Local server URL is empty, skipping scene_param");
                 }
 
                 localDebugUrl = GenerateDebugUrl(
@@ -750,10 +849,72 @@ namespace TapTapMiniGame.Editor
         private void DrawLocalServerGUI()
         {
             EditorGUILayout.Space(10);
+            
+            // 用户构建配置选择
+            if (userBuildProfiles != null && userBuildProfiles.Count > 0)
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.LabelField("用户游戏构建配置", EditorStyles.boldLabel);
+                
+                // 确保索引有效性
+                if (selectedProfileIndex < 0 || selectedProfileIndex >= userBuildProfiles.Count)
+                {
+                    selectedProfileIndex = 0;
+                }
+                
+                // 创建配置文件名称数组
+                string[] profileNames = userBuildProfiles.Select(p => $"{p.profileName} ({p.hostName})").ToArray();
+                
+                // 下拉框选择配置
+                EditorGUI.BeginChangeCheck();
+                int newSelectedIndex = EditorGUILayout.Popup("当前配置:", selectedProfileIndex, profileNames);
+                if (EditorGUI.EndChangeCheck() && newSelectedIndex != selectedProfileIndex)
+                {
+                    OnUserProfileSelectionChanged(newSelectedIndex);
+                }
+                
+                // 显示当前配置详情
+                if (selectedProfileIndex >= 0 && selectedProfileIndex < userBuildProfiles.Count)
+                {
+                    var currentProfile = userBuildProfiles[selectedProfileIndex];
+                    EditorGUILayout.LabelField("构建路径:", currentProfile.dstPath, EditorStyles.wordWrappedLabel);
+                }
+                
+                // 显示游戏信息
+                if (gameInfo != null && !string.IsNullOrEmpty(gameInfo.appId))
+                {
+                    EditorGUILayout.LabelField("App ID:", gameInfo.appId);
+                    EditorGUILayout.LabelField("游戏名称:", gameInfo.productName ?? "N/A");
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("未找到游戏信息，请先构建游戏", MessageType.Warning);
+                }
+                
+                // 刷新按钮
+                if (GUILayout.Button("刷新配置"))
+                {
+                    LoadUserBuildProfiles();
+                }
+                
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space(10);
+            }
+            else
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.HelpBox("未找到用户构建配置，请先构建你的 TapTap 小游戏", MessageType.Warning);
+                if (GUILayout.Button("刷新配置"))
+                {
+                    LoadUserBuildProfiles();
+                }
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space(10);
+            }
 
-            // 下载状态和进度
+            // 下载状态和进度（示例游戏，可选）
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("下载状态", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("示例游戏下载", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(downloadStatus);
             if (isDownloading)
             {

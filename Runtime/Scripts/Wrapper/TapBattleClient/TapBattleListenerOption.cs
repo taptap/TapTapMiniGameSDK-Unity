@@ -14,8 +14,8 @@ namespace TapTapMiniGame
 public class TapOnlineBattleListenerOption
 {
     public Action<DisconnectedInfo> onDisconnected;
-    public Action<BattleServiceErrorInfo> onBattleServiceError; 
-    public Action<RoomCustomPropertiesChangeInfo> onRoomCustomPropertiesChange;
+    public Action<BattleServiceErrorInfo> onBattleServiceError;
+    public Action<RoomPropertiesChangeInfo> onRoomPropertiesChange;
     public Action<PlayerCustomPropertiesChangeInfo> onPlayerCustomPropertiesChange;
     public Action<PlayerCustomStatusChangeInfo> onPlayerCustomStatusChange;
     public Action<BattleStopInfo> onBattleStop;
@@ -55,16 +55,17 @@ public class BattleServiceErrorInfo
 }
 
 /// <summary>
-/// 房间自定义属性变化信息
+/// 房间属性变化信息
 /// </summary>
 [Preserve]
-public class RoomCustomPropertiesChangeInfo
+public class RoomPropertiesChangeInfo
 {
-    public string roomId;
-    public Dictionary<string, object> properties;
-    
+    public string id;                    // 房间ID
+    public string name;                  // 房间名称
+    public Dictionary<string, object> customProperties;  // 自定义属性
+
     [Preserve]
-    public RoomCustomPropertiesChangeInfo() { }
+    public RoomPropertiesChangeInfo() { }
 }
 
 /// <summary>
@@ -99,9 +100,10 @@ public class PlayerCustomStatusChangeInfo
 [Preserve]
 public class BattleStopInfo
 {
-    public string reason;
-    public string roomId;
-    
+    public string roomId;     // 房间ID
+    public int battleId;      // 对战ID
+    public int reason;        // 结束原因: 0=房主主动结束, 1=超时结束(30分钟)
+
     [Preserve]
     public BattleStopInfo() { }
 }
@@ -134,8 +136,10 @@ public class BattleFrameInfo<T>
 public class BattleStartInfo
 {
     public string roomId;
+    public int battleId;  // 对战ID，房间内唯一
     public int startTime;
-    
+    public int seed;  // 随机数种子，用于NewRandomNumberGenerator
+
     [Preserve]
     public BattleStartInfo() { }
 }
@@ -186,10 +190,10 @@ public class PlayerEnterRoomInfo
 [Preserve]
 public class CustomMessageInfo
 {
-    public string fromPlayerId;
-    public object message;
-    public int type;
-    
+    public string playerId;    // 消息发送者玩家ID
+    public object message;     // 消息内容
+    public int type;           // 消息类型
+
     [Preserve]
     public CustomMessageInfo() { }
 }

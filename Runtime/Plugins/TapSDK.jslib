@@ -809,11 +809,10 @@ var TapBattleLibrary = {
                     };
                 }
                 
-                if (callbackIds.onRoomCustomPropertiesChange) {
-                    // Container layer API renamed to onRoomPropertiesChange
+                if (callbackIds.onRoomPropertiesChange) {
                     listenerConfig.onRoomPropertiesChange = (info) => {
                         console.log("[TapBattle] onRoomPropertiesChange:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onRoomCustomPropertiesChange, "success", info);
+                        _Tap_JSCallback(callbackIds.onRoomPropertiesChange, "success", info);
                     };
                 }
                 
@@ -898,7 +897,35 @@ var TapBattleLibrary = {
             console.error(error.message)
         }
     },
-    
+
+    Tap_Battle_GetRoomList: function (callbackId) {
+        try {
+            const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
+            window._tapOnlineBattleManager.getRoomList(_Tap_ContactCommonCallback({}, callbackIdStr));
+        } catch (error) {
+            console.error("[TapBattle] Error in Tap_Battle_GetRoomList:", error.message || "Unknown error");
+            const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
+            _Tap_JSCallback(callbackIdStr, "fail", {
+                code: -1,
+                message: error.message || "GetRoomList failed"
+            });
+        }
+    },
+
+    Tap_Battle_JoinRoom: function (jsonData, callbackId) {
+        try {
+            const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(jsonData));
+            const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
+            window._tapOnlineBattleManager.joinRoom(_Tap_ContactCommonCallback(args, callbackIdStr));
+        } catch (error) {
+            console.error("[TapBattle] Error in Tap_Battle_JoinRoom:", error.message || "Unknown error");
+            const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
+            _Tap_JSCallback(callbackIdStr, "fail", {
+                code: -1,
+                message: error.message || "JoinRoom failed"
+            });
+        }
+    },
 
 };
 

@@ -40,6 +40,9 @@ namespace TapServer
         private Dictionary<string, ClientInfo> connectedClients = new Dictionary<string, ClientInfo>();
         private List<string> clientIds = new List<string>();
         
+        // 客户端连接状态跟踪（用于等待协程）
+        private bool hasClientConnected = false;
+        
         // 消息回调系统
         private Dictionary<string, Action<string, ResponseData>> messageCallbacks = new Dictionary<string, Action<string, ResponseData>>();
 
@@ -197,10 +200,8 @@ namespace TapServer
             // 重置同步缓存
             TapTapMiniGame.TapSyncCache.ResetCache();
             
-            if (enableDebugLog)
-            {
-                Debug.Log($"[TapSDK开发服务器] 初始化完成，端口: {serverPort}，TapEnv数据缓存已重置");
-            }
+            // 始终显示端口信息，方便多Unity实例调试
+            Debug.Log($"[TapSDK开发服务器] ✅ 初始化完成 - 使用端口: {serverPort}，TapEnv数据缓存已重置");
         }
 
         private int FindAvailablePort(int startPort = 8081)
@@ -211,62 +212,105 @@ namespace TapServer
             {
                 if (IsPortAvailable(port))
                 {
-                    if (enableDebugLog)
+                    // 始终显示找到的端口，方便多Unity实例调试
+                    if (port != startPort)
                     {
-                        Debug.Log($"[TapSDK开发服务器] 找到可用端口: {port}");
+                        Debug.Log($"[TapSDK开发服务器] ⚠️ 默认端口 {startPort} 被占用，使用端口: {port}");
                     }
                     return port;
-                }
-                else if (enableDebugLog)
-                {
-                    Debug.Log($"[TapSDK开发服务器] 端口 {port} 已被占用，尝试下一个");
                 }
             }
             
             // 如果所有端口都被占用，返回默认端口（会在启动时报错）
-            Debug.LogWarning($"[TapSDK开发服务器] 端口范围 {startPort}-{maxPort} 全部被占用，使用默认端口 {startPort}");
+            Debug.LogWarning($"[TapSDK开发服务器] ❌ 端口范围 {startPort}-{maxPort} 全部被占用，使用默认端口 {startPort} (可能会失败)");
             return startPort;
         }
 
         /// <summary>
         /// 检查指定端口是否可用
+        /// 使用IPGlobalProperties来检测，不实际占用端口，避免端口释放延迟问题
         /// </summary>
         /// <param name="port">要检查的端口号</param>
         /// <returns>true表示端口可用，false表示被占用</returns>
         private bool IsPortAvailable(int port)
         {
-            System.Net.Sockets.TcpListener listener = null;
             try
             {
-                // 使用TcpListener测试端口
-                listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Any, port);
-                listener.Start();
+                // 方法1: 使用IPGlobalProperties检测端口（推荐，不会实际占用端口）
+                var ipGlobalProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+                
+                // 检查TCP监听端口
+                var tcpListeners = ipGlobalProperties.GetActiveTcpListeners();
+                foreach (var endpoint in tcpListeners)
+                {
+                    if (endpoint.Port == port)
+                    {
+                        if (enableDebugLog)
+                        {
+                            Debug.Log($"[TapSDK开发服务器] 端口 {port} 已被TCP监听占用");
+                        }
+                        return false;
+                    }
+                }
+                
+                // 检查TCP连接端口
+                var tcpConnections = ipGlobalProperties.GetActiveTcpConnections();
+                foreach (var connection in tcpConnections)
+                {
+                    if (connection.LocalEndPoint.Port == port)
+                    {
+                        if (enableDebugLog)
+                        {
+                            Debug.Log($"[TapSDK开发服务器] 端口 {port} 已被TCP连接占用");
+                        }
+                        return false;
+                    }
+                }
+                
                 return true;
-            }
-            catch (System.Net.Sockets.SocketException)
-            {
-                // 端口被占用或其他网络错误
-                return false;
             }
             catch (System.Exception e)
             {
-                // 其他异常，假设端口不可用
+                // 如果IPGlobalProperties方法失败，使用备用方法
                 if (enableDebugLog)
                 {
-                    Debug.LogWarning($"[TapSDK开发服务器] 检查端口 {port} 时出现异常: {e.Message}");
+                    Debug.LogWarning($"[TapSDK开发服务器] IPGlobalProperties检查失败: {e.Message}，使用备用检测方法");
                 }
-                return false;
-            }
-            finally
-            {
-                // 确保在所有情况下都释放监听器
+                
+                // 方法2: 备用方案 - 尝试绑定端口（快速检测）
+                System.Net.Sockets.Socket socket = null;
                 try
                 {
-                    listener?.Stop();
+                    socket = new System.Net.Sockets.Socket(
+                        System.Net.Sockets.AddressFamily.InterNetwork,
+                        System.Net.Sockets.SocketType.Stream,
+                        System.Net.Sockets.ProtocolType.Tcp
+                    );
+                    
+                    socket.SetSocketOption(
+                        System.Net.Sockets.SocketOptionLevel.Socket,
+                        System.Net.Sockets.SocketOptionName.ReuseAddress,
+                        false
+                    );
+                    
+                    socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, port));
+                    return true;
                 }
-                catch
+                catch (System.Net.Sockets.SocketException)
                 {
-                    // 忽略Stop时的异常
+                    return false;
+                }
+                finally
+                {
+                    try
+                    {
+                        socket?.Close();
+                        socket?.Dispose();
+                    }
+                    catch
+                    {
+                        // 忽略释放异常
+                    }
                 }
             }
         }
@@ -362,6 +406,41 @@ namespace TapServer
         }
 
         /// <summary>
+        /// 等待客户端连接的协程
+        /// 用于在游戏初始化流程中等待调试客户端（手机）连接
+        /// </summary>
+        /// <param name="timeout">超时时间（秒），默认30秒</param>
+        /// <returns>协程迭代器</returns>
+        public System.Collections.IEnumerator WaitForClientConnected(float timeout = 30f)
+        {
+            if (enableDebugLog)
+            {
+                Debug.Log($"[TapSDK开发服务器] 等待客户端连接... (超时: {timeout}秒)");
+            }
+            
+            float elapsedTime = 0f;
+            
+            // 等待直到有客户端连接或超时
+            while (!hasClientConnected && elapsedTime < timeout)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
+            if (hasClientConnected)
+            {
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] ✅ 客户端已连接，继续执行 (等待时间: {elapsedTime:F2}秒)");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[TapSDK开发服务器] ⏱️ 等待客户端连接超时 ({timeout}秒)，继续执行");
+            }
+        }
+
+        /// <summary>
         /// 手动启动服务器
         /// </summary>
         public void StartServer()
@@ -380,6 +459,9 @@ namespace TapServer
 
             try
             {
+                // 重置客户端连接状态
+                hasClientConnected = false;
+                
                 webSocketServer.StartServer();
             }
             catch (Exception e)
@@ -450,10 +532,8 @@ namespace TapServer
 
         private void HandleServerStarted(string serverAddress)
         {
-            if (enableDebugLog)
-            {
-                Debug.Log($"[TapSDK开发服务器] ✅ 服务器启动: {serverAddress}");
-            }
+            // 始终显示服务器启动信息，方便多Unity实例调试
+            Debug.Log($"[TapSDK开发服务器] ✅ 服务器启动成功 - 地址: {serverAddress} (端口: {serverPort})");
             OnServerStarted?.Invoke(serverAddress);
         }
 
@@ -480,6 +560,9 @@ namespace TapServer
             
             connectedClients[clientId] = clientInfo;
             clientIds.Add(clientId);
+            
+            // 标记已有客户端连接（用于等待协程）
+            hasClientConnected = true;
             
             if (enableDebugLog)
             {
@@ -812,6 +895,12 @@ namespace TapServer
             }
             clientIds.Remove(clientId);
             
+            // 如果所有客户端都断开，重置连接标志
+            if (clientIds.Count == 0)
+            {
+                hasClientConnected = false;
+            }
+            
             if (enableDebugLog)
             {
                 Debug.Log($"[TapSDK开发服务器] ❌ 客户端断开 (剩余连接数: {clientIds.Count})");
@@ -839,6 +928,12 @@ namespace TapServer
                             Debug.Log($"[TapSDK开发服务器] 收到消息类型: {messageType}");
                         }
                         
+                        // 特殊处理：BattleEvent事件推送
+                        if (messageType == "BattleEvent")
+                        {
+                            HandleBattleEventMessage(clientId, jsonData);
+                            return;
+                        }
 
                         // 创建ResponseData对象用于回调
                         ResponseData responseData = new ResponseData();
@@ -934,6 +1029,38 @@ namespace TapServer
                 //     data = new { originalMessage = message, serverTime = DateTime.Now.ToString() }
                 // };
                 // BroadcastToAll(response);
+            }
+        }
+
+        /// <summary>
+        /// 处理多人对战事件消息
+        /// </summary>
+        /// <param name="clientId">客户端ID</param>
+        /// <param name="message">事件消息JSON数据</param>
+        private void HandleBattleEventMessage(string clientId, JsonData message)
+        {
+            try
+            {
+                if (!message.ContainsKey("eventType") || !message.ContainsKey("eventData"))
+                {
+                    LogError("[NetworkServerModule] BattleEvent消息缺少必要字段 (eventType或eventData)");
+                    return;
+                }
+
+                string eventType = message["eventType"].ToString();
+                JsonData eventData = message["eventData"];
+
+                // 转发到事件管理器
+                TapBattleDebugEventManager.Instance.OnBattleEventReceived(eventType, eventData);
+
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[NetworkServerModule] 📥 收到Battle事件: {eventType}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"[NetworkServerModule] 处理BattleEvent失败: {e.Message}\n{e.StackTrace}");
             }
         }
 

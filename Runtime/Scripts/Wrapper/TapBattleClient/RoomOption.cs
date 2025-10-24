@@ -78,25 +78,82 @@ namespace TapTapMiniGame
     public class LeaveRoomOption
     {
         // === 立即回调（对应Native返回值）===
-        
+
         /// <summary>
         /// 参数验证成功回调 - 对应Native返回0
         /// </summary>
         [System.NonSerialized]
         public Action<RoomValidationResponse> success;
-        
+
         /// <summary>
         /// 参数验证失败回调 - 对应Native返回-1/-2
         /// </summary>
         [System.NonSerialized]
         public Action<TapCallbackResult> fail;
-        
+
         /// <summary>
         /// 完成回调
         /// </summary>
         [System.NonSerialized]
         public Action<TapCallbackResult> complete;
-        
+
         // 注意：实际离开结果通过ITapBattleEventHandler.OnLeaveRoomResult异步回调
+    }
+
+    /// <summary>
+    /// 获取房间列表选项 - OnlineBattleManager架构
+    /// </summary>
+    [Preserve]
+    [System.Serializable]
+    public class GetRoomListOption
+    {
+        /// <summary>
+        /// 获取房间列表成功回调 - 包含房间列表
+        /// </summary>
+        [System.NonSerialized]
+        public Action<GetRoomListSuccessResponse> success;
+
+        /// <summary>
+        /// 获取失败回调
+        /// </summary>
+        [System.NonSerialized]
+        public Action<TapCallbackResult> fail;
+
+        /// <summary>
+        /// 完成回调
+        /// </summary>
+        [System.NonSerialized]
+        public Action<TapCallbackResult> complete;
+    }
+
+    /// <summary>
+    /// 加入房间选项 - OnlineBattleManager架构
+    /// </summary>
+    [Preserve]
+    [System.Serializable]
+    public class JoinRoomOption
+    {
+        /// <summary>
+        /// 加入房间请求数据
+        /// </summary>
+        public JoinRoomRequest data;
+
+        /// <summary>
+        /// 加入房间成功回调 - 包含完整房间信息
+        /// </summary>
+        [System.NonSerialized]
+        public Action<JoinRoomSuccessResponse> success;
+
+        /// <summary>
+        /// 加入失败回调
+        /// </summary>
+        [System.NonSerialized]
+        public Action<TapCallbackResult> fail;
+
+        /// <summary>
+        /// 完成回调
+        /// </summary>
+        [System.NonSerialized]
+        public Action<TapCallbackResult> complete;
     }
 }

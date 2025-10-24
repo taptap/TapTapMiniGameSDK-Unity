@@ -2473,5 +2473,199 @@ namespace TapTapMiniGame
         #endregion
         #endregion
     }
+
+    /// <summary>
+    /// 多人对战客户端API - Editor环境桥接
+    /// </summary>
+    public partial class TapBattleClient
+    {
+        #region 生命周期管理
+
+        /// <summary>
+        /// 初始化多人对战SDK
+        /// </summary>
+        public static void Initialize(ITapBattleEventHandler eventHandler)
+        {
+            TapDebugBridge.Battle_Initialize(eventHandler);
+        }
+
+        /// <summary>
+        /// 终止化多人对战SDK
+        /// </summary>
+        public static void FinalizeSDK()
+        {
+            TapDebugBridge.Battle_FinalizeSDK();
+        }
+
+        #endregion
+
+        #region 连接管理
+
+        /// <summary>
+        /// 连接多人对战服务
+        /// </summary>
+        public static void Connect(BattleConnectOption option)
+        {
+            TapDebugBridge.Battle_Connect(option);
+        }
+
+        /// <summary>
+        /// 断开多人对战服务连接
+        /// </summary>
+        public static void Disconnect(BattleOption option)
+        {
+            TapDebugBridge.Battle_Disconnect(option);
+        }
+
+        #endregion
+
+        #region 房间管理
+
+        /// <summary>
+        /// 创建房间
+        /// </summary>
+        public static void CreateRoom(CreateRoomOption option)
+        {
+            TapDebugBridge.Battle_CreateRoom(option);
+        }
+
+        /// <summary>
+        /// 匹配房间
+        /// </summary>
+        public static void MatchRoom(MatchRoomOption option)
+        {
+            TapDebugBridge.Battle_MatchRoom(option);
+        }
+
+        /// <summary>
+        /// 离开房间
+        /// </summary>
+        public static void LeaveRoom(LeaveRoomOption option)
+        {
+            TapDebugBridge.Battle_LeaveRoom(option);
+        }
+
+        /// <summary>
+        /// 获取房间列表
+        /// </summary>
+        public static void GetRoomList(GetRoomListOption option)
+        {
+            TapDebugBridge.Battle_GetRoomList(option);
+        }
+
+        /// <summary>
+        /// 加入指定房间
+        /// </summary>
+        public static void JoinRoom(JoinRoomOption option)
+        {
+            TapDebugBridge.Battle_JoinRoom(option);
+        }
+
+        /// <summary>
+        /// 踢玩家出房间
+        /// </summary>
+        public static void KickRoomPlayer(KickRoomPlayerOption option)
+        {
+            TapDebugBridge.Battle_KickRoomPlayer(option);
+        }
+
+        #endregion
+
+        #region 玩家属性更新
+
+        /// <summary>
+        /// 更新玩家自定义状态
+        /// </summary>
+        public static void UpdatePlayerCustomStatus(UpdatePlayerCustomStatusOption option)
+        {
+            TapDebugBridge.Battle_UpdatePlayerCustomStatus(option);
+        }
+
+        /// <summary>
+        /// 更新玩家自定义属性
+        /// </summary>
+        public static void UpdatePlayerCustomProperties(UpdatePlayerCustomPropertiesOption option)
+        {
+            TapDebugBridge.Battle_UpdatePlayerCustomProperties(option);
+        }
+
+        /// <summary>
+        /// 更新房间属性
+        /// </summary>
+        public static void UpdateRoomProperties(UpdateRoomPropertiesOption option)
+        {
+            TapDebugBridge.Battle_UpdateRoomProperties(option);
+        }
+
+        #endregion
+
+        #region 对战管理
+
+        /// <summary>
+        /// 开始对战
+        /// </summary>
+        public static void StartBattle(StartBattleOption option)
+        {
+            TapDebugBridge.Battle_StartBattle(option);
+        }
+
+        /// <summary>
+        /// 发送玩家输入
+        /// </summary>
+        public static void SendInput(SendInputOption option)
+        {
+            TapDebugBridge.Battle_SendInput(option);
+        }
+
+        /// <summary>
+        /// 停止对战
+        /// </summary>
+        public static void StopBattle(StopBattleOption option)
+        {
+            TapDebugBridge.Battle_StopBattle(option);
+        }
+
+        #endregion
+
+        #region 自定义消息
+
+        /// <summary>
+        /// 发送自定义消息
+        /// </summary>
+        public static void SendCustomMessage(SendCustomMessageOption option)
+        {
+            TapDebugBridge.Battle_SendCustomMessage(option);
+        }
+
+        #endregion
+
+        #region 随机数工具
+
+        /// <summary>
+        /// 创建随机数生成器
+        /// </summary>
+        public static void NewRandomNumberGenerator(int seed)
+        {
+            TapDebugBridge.Battle_NewRandomNumberGenerator(seed);
+        }
+
+        /// <summary>
+        /// 生成随机整数
+        /// </summary>
+        public static int RandomInt()
+        {
+            return TapDebugBridge.Battle_RandomInt();
+        }
+
+        /// <summary>
+        /// 释放随机数生成器
+        /// </summary>
+        public static void FreeRandomNumberGenerator()
+        {
+            TapDebugBridge.Battle_FreeRandomNumberGenerator();
+        }
+
+        #endregion
+    }
 }
 #endif

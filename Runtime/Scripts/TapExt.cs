@@ -335,6 +335,24 @@ namespace TapTapMiniGame
         // === 新增API ===
 
         /// <summary>
+        /// 获取房间列表 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">获取房间列表选项</param>
+        public static void GetRoomList(GetRoomListOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_GetRoomList(option);
+        }
+
+        /// <summary>
+        /// 加入指定房间 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">加入房间选项</param>
+        public static void JoinRoom(JoinRoomOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_JoinRoom(option);
+        }
+
+        /// <summary>
         /// 踢玩家出房间 - OnlineBattleManager架构
         /// 仅限房主调用，且房间未开战时才能使用
         /// </summary>
