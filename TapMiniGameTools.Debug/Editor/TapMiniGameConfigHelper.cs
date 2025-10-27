@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2022_1_OR_NEWER && ENABLE_BUILD_PROFILE_2022
 using UnityEditor.Build.Profile;
 #endif
 
@@ -27,8 +27,8 @@ namespace TapTapMiniGame.Editor
             
             try
             {
-#if UNITY_2022_1_OR_NEWER
-                // Unity 2022及以上版本，读取Build Profiles
+#if UNITY_2022_1_OR_NEWER && ENABLE_BUILD_PROFILE_2022
+                // Unity 2022及以上版本，读取Build Profiles (需要定义ENABLE_BUILD_PROFILE_2022宏才启用)
                 LoadBuildProfiles(buildProfiles);
 #endif
                 
@@ -94,9 +94,9 @@ namespace TapTapMiniGame.Editor
             }
         }
         
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2022_1_OR_NEWER && ENABLE_BUILD_PROFILE_2022
         /// <summary>
-        /// 加载 Unity 2022+ 的 Build Profiles
+        /// 加载 Unity 2022+ 的 Build Profiles (需要定义ENABLE_BUILD_PROFILE_2022宏才启用)
         /// </summary>
         private static void LoadBuildProfiles(List<BuildProfileInfo> buildProfiles)
         {
