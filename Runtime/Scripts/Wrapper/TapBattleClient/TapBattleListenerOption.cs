@@ -101,7 +101,7 @@ public class PlayerCustomStatusChangeInfo
 public class BattleStopInfo
 {
     public string roomId;     // 房间ID
-    public int battleId;      // 对战ID
+    public string battleId;   // 对战ID（字符串类型，与服务器返回一致）
     public int reason;        // 结束原因: 0=房主主动结束, 1=超时结束(30分钟)
 
     [Preserve]
@@ -136,7 +136,7 @@ public class BattleFrameInfo<T>
 public class BattleStartInfo
 {
     public string roomId;
-    public int battleId;  // 对战ID，房间内唯一
+    public string battleId;  // 对战ID，房间内唯一（字符串类型，与服务器返回一致）
     public int startTime;
     public int seed;  // 随机数种子，用于NewRandomNumberGenerator
 
