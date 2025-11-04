@@ -148,8 +148,8 @@ namespace TapServer
                     break;
 
                 case "OnBattleStop":
-                    var battleStopInfo = JsonMapper.ToObject<BattleStopInfo>(eventDataJson);
-                    registeredEventHandler.OnBattleStop(battleStopInfo);
+                        var battleStopInfo = JsonMapper.ToObject<BattleStopInfo>(eventDataJson);
+                        registeredEventHandler.OnBattleStop(battleStopInfo);
                     Debug.Log($"[TapBattleDebugEventManager] ⏹️ OnBattleStop");
                     break;
 
