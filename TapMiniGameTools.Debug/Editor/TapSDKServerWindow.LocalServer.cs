@@ -17,6 +17,18 @@ namespace TapTapMiniGame.Editor
 {
     public partial class TapSDKServerWindow : EditorWindow
     {
+        #region 辅助类
+        /// <summary>
+        /// Client版本信息
+        /// </summary>
+        [Serializable]
+        private class ClientVersionInfo
+        {
+            public string hash = "";
+            public string updateTime = "";
+        }
+        #endregion
+        
         #region 常量定义
         /// <summary>
         /// 小游戏包的CDN下载地址
@@ -24,14 +36,14 @@ namespace TapTapMiniGame.Editor
         private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/7900f1de1a645a1c119db41ba0d3d266.zip";
 
         /// <summary>
-        /// 本地存储的hash值的EditorPrefs键名
-        /// </summary>
-        private const string LOCAL_HASH_KEY = "TapSDK_LocalServer_Hash";
-
-        /// <summary>
         /// 本地调试文件存储目录
         /// </summary>
         private const string DEBUG_DIR = "Library/TapMiniGameDebug";
+        
+        /// <summary>
+        /// Client版本信息文件名
+        /// </summary>
+        private const string CLIENT_VERSION_FILE = ".client_version";
 
         /// <summary>
         /// 服务器优先尝试的端口列表
@@ -332,9 +344,10 @@ namespace TapTapMiniGame.Editor
             string gameJsonPath = Path.Combine(localPath, "minigame", "game.json");
             bool hasLocalFiles = File.Exists(gameJsonPath);
 
-            // 获取当前URL中的hash
+            // 获取当前URL中的hash和本地保存的版本信息
             string currentHash = ExtractHashFromUrl(DOWNLOAD_URL);
-            string savedHash = EditorPrefs.GetString(LOCAL_HASH_KEY, "");
+            ClientVersionInfo localVersion = GetLocalClientVersion();
+            string savedHash = localVersion.hash;
 
             if (!hasLocalFiles || currentHash != savedHash)
             {
@@ -371,6 +384,63 @@ namespace TapTapMiniGame.Editor
                 }
             }
             return "";
+        }
+        
+        /// <summary>
+        /// 获取本地Client版本信息
+        /// </summary>
+        private ClientVersionInfo GetLocalClientVersion()
+        {
+            try
+            {
+                string localPath = Path.Combine(Application.dataPath, "..", DEBUG_DIR);
+                string versionFilePath = Path.Combine(localPath, CLIENT_VERSION_FILE);
+                
+                if (File.Exists(versionFilePath))
+                {
+                    string jsonContent = File.ReadAllText(versionFilePath);
+                    ClientVersionInfo versionInfo = JsonUtility.FromJson<ClientVersionInfo>(jsonContent);
+                    return versionInfo ?? new ClientVersionInfo();
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Failed to read client version info: {e.Message}");
+            }
+            
+            return new ClientVersionInfo();
+        }
+        
+        /// <summary>
+        /// 保存Client版本信息
+        /// </summary>
+        private void SaveClientVersion(string hash)
+        {
+            try
+            {
+                string localPath = Path.Combine(Application.dataPath, "..", DEBUG_DIR);
+                if (!Directory.Exists(localPath))
+                {
+                    Directory.CreateDirectory(localPath);
+                }
+                
+                string versionFilePath = Path.Combine(localPath, CLIENT_VERSION_FILE);
+                
+                ClientVersionInfo versionInfo = new ClientVersionInfo
+                {
+                    hash = hash,
+                    updateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
+                };
+                
+                string jsonContent = JsonUtility.ToJson(versionInfo, true);
+                File.WriteAllText(versionFilePath, jsonContent);
+                
+                Debug.Log($"Saved client version info: hash={hash}, time={versionInfo.updateTime}");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to save client version info: {e.Message}");
+            }
         }
         #endregion
 
@@ -416,9 +486,9 @@ namespace TapTapMiniGame.Editor
                     string minigamePath = Path.Combine(localPath, "minigame");
                     await UnzipFile(zipPath, minigamePath);
 
-                    // 更新hash记录
+                    // 保存版本信息到文件
                     string currentHash = ExtractHashFromUrl(DOWNLOAD_URL);
-                    EditorPrefs.SetString(LOCAL_HASH_KEY, currentHash);
+                    SaveClientVersion(currentHash);
 
                     downloadStatus = "下载完成";
 
@@ -486,6 +556,50 @@ namespace TapTapMiniGame.Editor
                     throw;
                 }
             });
+        }
+        
+        /// <summary>
+        /// 强制重新下载Client包
+        /// </summary>
+        private void ForceRedownloadClient()
+        {
+            try
+            {
+                string localPath = Path.Combine(Application.dataPath, "..", DEBUG_DIR);
+                
+                // 删除版本文件
+                string versionFilePath = Path.Combine(localPath, CLIENT_VERSION_FILE);
+                if (File.Exists(versionFilePath))
+                {
+                    File.Delete(versionFilePath);
+                    Debug.Log($"Deleted version file: {versionFilePath}");
+                }
+                
+                // 删除zip文件
+                string zipPath = Path.Combine(localPath, "game.zip");
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                    Debug.Log($"Deleted zip file: {zipPath}");
+                }
+                
+                // 删除minigame目录
+                string minigamePath = Path.Combine(localPath, "minigame");
+                if (Directory.Exists(minigamePath))
+                {
+                    Directory.Delete(minigamePath, true);
+                    Debug.Log($"Deleted minigame directory: {minigamePath}");
+                }
+                
+                // 更新状态并触发下载
+                downloadStatus = "准备重新下载...";
+                _ = StartDownload();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to force redownload: {e.Message}");
+                downloadStatus = $"清理失败: {e.Message}";
+            }
         }
         #endregion
 
@@ -914,8 +1028,26 @@ namespace TapTapMiniGame.Editor
 
             // 下载状态和进度（示例游戏，可选）
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("示例游戏下载", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField(downloadStatus);
+            EditorGUILayout.LabelField("示例游戏 Client", EditorStyles.boldLabel);
+            
+            // 显示Client包版本信息
+            ClientVersionInfo localVersion = GetLocalClientVersion();
+            if (!string.IsNullOrEmpty(localVersion.hash))
+            {
+                string shortHash = localVersion.hash.Length > 8 ? localVersion.hash.Substring(0, 8) : localVersion.hash;
+                EditorGUILayout.LabelField($"本地版本: {shortHash}");
+                
+                if (!string.IsNullOrEmpty(localVersion.updateTime))
+                {
+                    EditorGUILayout.LabelField($"更新时间: {localVersion.updateTime}");
+                }
+            }
+            else
+            {
+                EditorGUILayout.LabelField("本地版本: 未下载");
+            }
+            
+            EditorGUILayout.LabelField($"状态: {downloadStatus}");
             if (isDownloading)
             {
                 EditorGUI.ProgressBar(EditorGUILayout.GetControlRect(false, 20), 
@@ -976,6 +1108,17 @@ namespace TapTapMiniGame.Editor
                 if (GUILayout.Button("复制URL"))
                 {
                     EditorGUIUtility.systemCopyBuffer = localDebugUrl;
+                }
+                
+                EditorGUILayout.Space(5);
+                
+                // 强制重新下载按钮（放在二维码下方）
+                if (!isDownloading)
+                {
+                    if (GUILayout.Button("强制重新下载 Client"))
+                    {
+                        ForceRedownloadClient();
+                    }
                 }
                 
                 EditorGUILayout.EndVertical();
