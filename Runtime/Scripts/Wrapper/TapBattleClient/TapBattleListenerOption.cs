@@ -185,14 +185,13 @@ public class PlayerEnterRoomInfo
 }
 
 /// <summary>
-/// 自定义消息信息
+/// 自定义消息信息（OnCustomMessage事件专用）
 /// </summary>
 [Preserve]
 public class CustomMessageInfo
 {
     public string playerId;    // 消息发送者玩家ID
-    public object message;     // 消息内容
-    public int type;           // 消息类型
+    public string msg;         // 消息内容（UTF-8字符串）
 
     [Preserve]
     public CustomMessageInfo() { }
