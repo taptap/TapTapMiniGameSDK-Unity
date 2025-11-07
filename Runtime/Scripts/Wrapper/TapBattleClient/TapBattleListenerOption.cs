@@ -62,7 +62,7 @@ public class RoomPropertiesChangeInfo
 {
     public string id;                    // 房间ID
     public string name;                  // 房间名称
-    public Dictionary<string, object> customProperties;  // 自定义属性
+    public string customProperties;      // 自定义属性（JSON字符串）
 
     [Preserve]
     public RoomPropertiesChangeInfo() { }
@@ -75,8 +75,8 @@ public class RoomPropertiesChangeInfo
 public class PlayerCustomPropertiesChangeInfo
 {
     public string playerId;
-    public Dictionary<string, object> properties;
-    
+    public string properties;  // 玩家属性（JSON字符串）
+
     [Preserve]
     public PlayerCustomPropertiesChangeInfo() { }
 }

@@ -104,71 +104,11 @@ namespace TapServer
 
             try
             {
-                // 获取本机IP - 优先使用更可靠的方法
-                IPAddress localAddress = null;
+                // 使用 TapSDKApiUtil 的优化IP获取方法
+                string ipString = TapTapMiniGame.TapSDKApiUtil.GetLocalIPAddress();
+                IPAddress localAddress = IPAddress.Parse(ipString);
                 
-                // 方法1：首先尝试获取网络接口地址（更可靠）
-                try
-                {
-                    var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-                    foreach (var ni in networkInterfaces)
-                    {
-                        if (ni.OperationalStatus == OperationalStatus.Up && 
-                            ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                        {
-                            var ipProperties = ni.GetIPProperties();
-                            foreach (var addr in ipProperties.UnicastAddresses)
-                            {
-                                if (addr.Address.AddressFamily == AddressFamily.InterNetwork &&
-                                    !IPAddress.IsLoopback(addr.Address))
-                                {
-                                    localAddress = addr.Address;
-                                    LogMessage($"Found network interface address: {localAddress}");
-                                    break;
-                                }
-                            }
-                            if (localAddress != null) break;
-                        }
-                    }
-                }
-                catch (Exception networkException)
-                {
-                    LogMessage($"Network interface enumeration failed: {networkException.Message}");
-                }
-                
-                // 方法2：如果网络接口方法失败，尝试DNS解析（可能有localhost配置问题）
-                if (localAddress == null)
-                {
-                    try
-                    {
-                        string hostName = Dns.GetHostName();
-                        LogMessage($"Attempting to resolve hostname: {hostName}");
-                        IPAddress[] addresses = Dns.GetHostAddresses(hostName);
-
-                        // 查找IPv4地址
-                        foreach (IPAddress address in addresses)
-                        {
-                            if (address.AddressFamily == AddressFamily.InterNetwork && 
-                                !IPAddress.IsLoopback(address))
-                            {
-                                localAddress = address;
-                                LogMessage($"Resolved hostname to address: {localAddress}");
-                                break;
-                            }
-                        }
-                    }
-                    catch (Exception dnsException)
-                    {
-                        LogMessage($"DNS resolution failed for hostname: {dnsException.Message}");
-                    }
-                }
-
-                // 方法3：最后的回退方案
-                if (localAddress == null)
-                {
-                    LogMessage("Using fallback address (IPAddress.Any) - may indicate localhost/hosts file configuration issues");
-                    localAddress = IPAddress.Any;
-                }
+                LogMessage($"Using IP from TapSDKApiUtil: {ipString}");
 
                 serverIP = localAddress.ToString();
                 server = new TcpListener(localAddress, port);
