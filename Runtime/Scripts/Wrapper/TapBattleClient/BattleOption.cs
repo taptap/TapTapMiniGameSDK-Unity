@@ -201,11 +201,16 @@ namespace TapTapMiniGame
         /// 自定义消息内容（utf8字符串，最大2048字节）
         /// </summary>
         public string msg;
-        
+
         /// <summary>
-        /// 消息接收者类型：0-房间内所有玩家，1-队伍内所有玩家
+        /// 消息接收者类型：0-房间内所有玩家（不包括发送者），1-发送给指定玩家
         /// </summary>
         public int type;
+
+        /// <summary>
+        /// 接收方玩家ID列表（当type==1时有效，最多20个ID）
+        /// </summary>
+        public string[] receivers;
     }
 
     /// <summary>
