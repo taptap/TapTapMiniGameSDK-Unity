@@ -407,6 +407,30 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
+    /// 获取房间列表请求 - 对齐JS层数据结构
+    /// JS层格式: { roomType: string, offset: number, limit: number }
+    /// </summary>
+    [Preserve]
+    [System.Serializable]
+    public class GetRoomListRequest
+    {
+        /// <summary>
+        /// 房间类型（可选，不填则拉取全部类型的房间）
+        /// </summary>
+        public string roomType;
+
+        /// <summary>
+        /// 偏移量（可选，默认0，第一次请求时为0）
+        /// </summary>
+        public int offset;
+
+        /// <summary>
+        /// 请求获取的房间数量（可选，默认20，最大100）
+        /// </summary>
+        public int limit;
+    }
+
+    /// <summary>
     /// 获取房间列表成功响应
     /// </summary>
     [Preserve]

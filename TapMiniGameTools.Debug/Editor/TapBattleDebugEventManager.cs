@@ -121,14 +121,25 @@ namespace TapServer
                     break;
 
                 case "OnPlayerCustomPropertiesChange":
-                    var propInfo = JsonMapper.ToObject<PlayerCustomPropertiesChangeInfo>(eventDataJson);
+                    // 直接从JsonData提取字段，避免LitJson的双重JSON解析bug
+                    var propInfo = new PlayerCustomPropertiesChangeInfo
+                    {
+                        playerId = eventData["playerId"]?.ToString(),
+                        properties = eventData["properties"]?.ToString()  // 保持JSON字符串格式
+                    };
                     registeredEventHandler.OnPlayerCustomPropertiesChange(propInfo);
                     Debug.Log($"[TapBattleDebugEventManager] 🔧 OnPlayerCustomPropertiesChange");
                     break;
 
                 // 房间属性事件
                 case "OnRoomPropertiesChange":
-                    var roomInfo = JsonMapper.ToObject<RoomPropertiesChangeInfo>(eventDataJson);
+                    // 直接从JsonData提取字段，避免LitJson的双重JSON解析bug
+                    var roomInfo = new RoomPropertiesChangeInfo
+                    {
+                        id = eventData["id"]?.ToString(),
+                        name = eventData["name"]?.ToString(),
+                        customProperties = eventData["customProperties"]?.ToString()  // 保持JSON字符串格式
+                    };
                     registeredEventHandler.OnRoomPropertiesChange(roomInfo);
                     Debug.Log($"[TapBattleDebugEventManager] 🏠 OnRoomPropertiesChange");
                     break;

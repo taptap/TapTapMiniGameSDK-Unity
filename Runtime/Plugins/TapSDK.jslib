@@ -898,10 +898,11 @@ var TapBattleLibrary = {
         }
     },
 
-    Tap_Battle_GetRoomList: function (callbackId) {
+    Tap_Battle_GetRoomList: function (jsonData, callbackId) {
         try {
+            const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(jsonData));
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            window._tapOnlineBattleManager.getRoomList(_Tap_ContactCommonCallback({}, callbackIdStr));
+            window._tapOnlineBattleManager.getRoomList(_Tap_ContactCommonCallback(args, callbackIdStr));
         } catch (error) {
             console.error("[TapBattle] Error in Tap_Battle_GetRoomList:", error.message || "Unknown error");
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);

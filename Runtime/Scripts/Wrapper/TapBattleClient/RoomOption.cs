@@ -108,6 +108,11 @@ namespace TapTapMiniGame
     public class GetRoomListOption
     {
         /// <summary>
+        /// 获取房间列表请求数据（可选）
+        /// </summary>
+        public GetRoomListRequest data;
+
+        /// <summary>
         /// 获取房间列表成功回调 - 包含房间列表
         /// </summary>
         [System.NonSerialized]
