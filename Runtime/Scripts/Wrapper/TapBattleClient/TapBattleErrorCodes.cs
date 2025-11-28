@@ -4,7 +4,7 @@ using UnityEngine.Scripting;
 namespace TapTapMiniGame
 {
     /// <summary>
-    /// 多人对战错误码常量
+    /// 多人联机错误码常量
     /// </summary>
     [Preserve]
     public static class TapBattleErrorCodes
@@ -17,7 +17,7 @@ namespace TapTapMiniGame
         public const int PLAYER_NOT_FOUND = 30;    // 玩家不存在
         
         /// <summary>
-        /// 多人对战错误码字典 - 基于Native API文档
+        /// 多人联机错误码字典 - 基于Native API文档
         /// </summary>
         private static readonly Dictionary<int, string> ErrorDescriptions = new Dictionary<int, string>
         {

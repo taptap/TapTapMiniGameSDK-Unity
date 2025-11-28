@@ -7,8 +7,8 @@ using LitJson;
 namespace TapTapMiniGame
 {
     /// <summary>
-    /// Tap多人对战事件处理器接口
-    /// 用于统一处理多人对战的所有事件回调
+    /// Tap多人联机事件处理器接口
+    /// 用于统一处理多人联机的所有事件回调
     /// 与TapOnlineBattleListenerOption保持一致的数据类型
     /// </summary>
     [Preserve]
@@ -40,19 +40,19 @@ namespace TapTapMiniGame
         public void OnPlayerCustomStatusChange(PlayerCustomStatusChangeInfo info);
 
         /// <summary>
-        /// 对战停止通知
+        /// 帧同步停止通知
         /// </summary>
-        public void OnBattleStop(BattleStopInfo info);
+        public void OnFrameSyncStop(FrameSyncStopInfo info);
 
         /// <summary>
         /// 帧同步数据通知
         /// </summary>
-        public void OnBattleFrame(string frameData);
+        public void OnFrameInput(string frameData);
 
         /// <summary>
-        /// 对战开始通知
+        /// 帧同步开始通知
         /// </summary>
-        public void OnBattleStart(BattleStartInfo info);
+        public void OnFrameSyncStart(FrameSyncStartInfo info);
 
         /// <summary>
         /// 玩家离线通知

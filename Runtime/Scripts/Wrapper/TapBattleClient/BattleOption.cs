@@ -30,7 +30,7 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 连接多人对战服务选项 - 专用于Connect API
+    /// 连接多人联机服务选项 - 专用于Connect API
     /// 服务器返回格式: {"playerId":"xxx","errMsg":"connect:ok"}
     /// </summary>
     [Preserve]
@@ -66,7 +66,7 @@ namespace TapTapMiniGame
     {
         /// <summary>
         /// 玩家ID - 服务器分配的全局唯一ID
-        /// 这个ID在整个多人对战系统中唯一标识当前玩家
+        /// 这个ID在整个多人联机系统中唯一标识当前玩家
         /// </summary>
         public string playerId;
 
@@ -77,11 +77,11 @@ namespace TapTapMiniGame
     }
     
     /// <summary>
-    /// 开始对战选项
+    /// 开始帧同步选项
     /// </summary>
     [Preserve]
     [System.Serializable]
-    public class StartBattleOption
+    public class StartFrameSyncOption
     {
         /// <summary>
         /// 成功回调
@@ -103,11 +103,11 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 发送输入选项
+    /// 发送帧同步输入选项
     /// </summary>
     [Preserve]
     [System.Serializable]
-    public class SendInputOption
+    public class SendFrameInputOption
     {
         /// <summary>
         /// 游戏操作数据（utf8字符串格式）
@@ -134,11 +134,11 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 停止对战选项
+    /// 停止帧同步选项
     /// </summary>
     [Preserve]
     [System.Serializable]
-    public class StopBattleOption
+    public class StopFrameSyncOption
     {
         /// <summary>
         /// 成功回调
@@ -224,20 +224,7 @@ namespace TapTapMiniGame
         /// 消息数据，包含msg和type
         /// </summary>
         public SendCustomMessageData data;
-
-        /// <summary>
-        /// 自定义消息内容（utf8字符串，最大2048字节）
-        /// 注意：这个字段已废弃，请使用data.msg
-        /// </summary>
-        [System.NonSerialized]
-        public string msg;
-
-        /// <summary>
-        /// 消息接收者类型：0-房间内所有玩家，1-队伍内所有玩家
-        /// 注意：这个字段已废弃，请使用data.type
-        /// </summary>
-        [System.NonSerialized]
-        public int type;
+        
 
         /// <summary>
         /// 成功回调

@@ -8,7 +8,7 @@ using System;
 namespace TapServer
 {
     /// <summary>
-    /// 多人对战事件管理器 - Unity Editor端
+    /// 多人联机事件管理器 - Unity Editor端
     /// 接收来自真机的事件推送，转发到游戏代码注册的事件处理器
     /// </summary>
     public class TapBattleDebugEventManager
@@ -144,24 +144,24 @@ namespace TapServer
                     Debug.Log($"[TapBattleDebugEventManager] 🏠 OnRoomPropertiesChange");
                     break;
 
-                // 对战事件
+                // 帧同步事件
                 case "OnBattleStart":
-                    var battleStartInfo = JsonMapper.ToObject<BattleStartInfo>(eventDataJson);
-                    registeredEventHandler.OnBattleStart(battleStartInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] ▶️ OnBattleStart: seed={battleStartInfo.seed}");
+                    var battleStartInfo = JsonMapper.ToObject<FrameSyncStartInfo>(eventDataJson);
+                    registeredEventHandler.OnFrameSyncStart(battleStartInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] ▶️ OnFrameSyncStart: seed={battleStartInfo.seed}");
                     break;
 
                 case "OnBattleFrame":
                     // frameData是字符串类型，直接提取
                     string frameData = eventData.ToString();
-                    registeredEventHandler.OnBattleFrame(frameData);
+                    registeredEventHandler.OnFrameInput(frameData);
                     // 帧数据频繁，不输出日志
                     break;
 
                 case "OnBattleStop":
-                        var battleStopInfo = JsonMapper.ToObject<BattleStopInfo>(eventDataJson);
-                        registeredEventHandler.OnBattleStop(battleStopInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] ⏹️ OnBattleStop");
+                        var battleStopInfo = JsonMapper.ToObject<FrameSyncStopInfo>(eventDataJson);
+                        registeredEventHandler.OnFrameSyncStop(battleStopInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] ⏹️ OnFrameSyncStop");
                     break;
 
                 // 消息事件

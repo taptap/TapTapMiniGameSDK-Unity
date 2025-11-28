@@ -1358,7 +1358,7 @@ namespace TapServer
         }
 
         /// <summary>
-        /// 处理多人对战事件消息
+        /// 处理多人联机事件消息
         /// </summary>
         /// <param name="clientId">客户端ID</param>
         /// <param name="message">事件消息JSON数据</param>

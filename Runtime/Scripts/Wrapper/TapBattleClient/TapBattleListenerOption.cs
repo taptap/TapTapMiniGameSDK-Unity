@@ -18,9 +18,9 @@ public class TapOnlineBattleListenerOption
     public Action<RoomPropertiesChangeInfo> onRoomPropertiesChange;
     public Action<PlayerCustomPropertiesChangeInfo> onPlayerCustomPropertiesChange;
     public Action<PlayerCustomStatusChangeInfo> onPlayerCustomStatusChange;
-    public Action<BattleStopInfo> onBattleStop;
+    public Action<FrameSyncStopInfo> onBattleStop;
     public Action<string> onBattleFrame;
-    public Action<BattleStartInfo> onBattleStart;
+    public Action<FrameSyncStartInfo> onBattleStart;
     public Action<PlayerOfflineInfo> playerOffline;
     public Action<PlayerLeaveRoomInfo> playerLeaveRoom;
     public Action<PlayerEnterRoomInfo> playerEnterRoom;
@@ -95,17 +95,17 @@ public class PlayerCustomStatusChangeInfo
 }
 
 /// <summary>
-/// 对战停止信息
+/// 帧同步停止信息
 /// </summary>
 [Preserve]
-public class BattleStopInfo
+public class FrameSyncStopInfo
 {
     public string roomId;     // 房间ID
-    public string battleId;   // 对战ID（字符串类型，与服务器返回一致）
+    public int battleId;      // 帧同步会话ID（int类型，与服务器返回一致）
     public int reason;        // 结束原因: 0=房主主动结束, 1=超时结束(30分钟)
 
     [Preserve]
-    public BattleStopInfo() { }
+    public FrameSyncStopInfo() { }
 }
 
 
@@ -130,18 +130,18 @@ public class BattleFrameInfo<T>
 }
 
 /// <summary>
-/// 对战开始信息
+/// 帧同步开始信息
 /// </summary>
 [Preserve]
-public class BattleStartInfo
+public class FrameSyncStartInfo
 {
     public string roomId;
-    public string battleId;  // 对战ID，房间内唯一（字符串类型，与服务器返回一致）
+    public int battleId;  // 帧同步会话ID，房间内唯一（int类型，与服务器返回一致）
     public int startTime;
     public int seed;  // 随机数种子，用于NewRandomNumberGenerator
 
     [Preserve]
-    public BattleStartInfo() { }
+    public FrameSyncStartInfo() { }
 }
 
 /// <summary>

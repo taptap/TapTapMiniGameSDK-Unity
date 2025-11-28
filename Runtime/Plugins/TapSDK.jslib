@@ -668,47 +668,47 @@ var TapBattleLibrary = {
     
     // === Battle Management Interface ===
     
-    Tap_Battle_StartBattle: function (callbackId) {
+    Tap_Battle_StartFrameSync: function (callbackId) {
         try {
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            window._tapOnlineBattleManager.startBattle(_Tap_ContactCommonCallback({}, callbackIdStr));
+            window._tapOnlineBattleManager.startFrameSync(_Tap_ContactCommonCallback({}, callbackIdStr));
         } catch (error) {
-            console.error("[TapBattle] Error in Tap_Battle_StartBattle:", error.message || "Unknown error");
+            console.error("[TapBattle] Error in Tap_Battle_StartFrameSync:", error.message || "Unknown error");
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
-                message: error.message || "StartBattle failed"
+                message: error.message || "StartFrameSync failed"
             });
         }
     },
     
-    Tap_Battle_SendInput: function (jsonData, callbackId) {
+    Tap_Battle_SendFrameInput: function (jsonData, callbackId) {
         try {
             const jsonDataStr = _TJPointer_stringify_adaptor(jsonData);
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            window._tapOnlineBattleManager.sendInput(_Tap_ContactCommonCallback({
+            window._tapOnlineBattleManager.sendFrameInput(_Tap_ContactCommonCallback({
                 data: jsonDataStr
             }, callbackIdStr));
         } catch (error) {
-            console.error("[TapBattle] Error in Tap_Battle_SendInput:", error.message || "Unknown error");
+            console.error("[TapBattle] Error in Tap_Battle_SendFrameInput:", error.message || "Unknown error");
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
-                message: error.message || "SendInput failed"
+                message: error.message || "SendFrameInput failed"
             });
         }
     },
     
-    Tap_Battle_StopBattle: function (callbackId) {
+    Tap_Battle_StopFrameSync: function (callbackId) {
         try {
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
-            window._tapOnlineBattleManager.stopBattle(_Tap_ContactCommonCallback({}, callbackIdStr));
+            window._tapOnlineBattleManager.stopFrameSync(_Tap_ContactCommonCallback({}, callbackIdStr));
         } catch (error) {
-            console.error("[TapBattle] Error in Tap_Battle_StopBattle:", error.message || "Unknown error");
+            console.error("[TapBattle] Error in Tap_Battle_StopFrameSync:", error.message || "Unknown error");
             const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
             _Tap_JSCallback(callbackIdStr, "fail", {
                 code: -1,
-                message: error.message || "StopBattle failed"
+                message: error.message || "StopFrameSync failed"
             });
         }
     },

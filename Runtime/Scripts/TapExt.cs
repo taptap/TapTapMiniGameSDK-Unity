@@ -171,12 +171,12 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// Tap多人对战客户端 - OnlineBattleManager架构
+    /// Tap多人联机客户端 - OnlineBattleManager架构
     /// </summary>
     public class TapBattleClient
     {
         /// <summary>
-        /// 初始化多人对战SDK - OnlineBattleManager架构
+        /// 初始化多人联机SDK - OnlineBattleManager架构
         /// 自动创建Manager实例
         /// </summary>
         /// <param name="eventHandler">事件处理器，需实现ITapBattleEventHandler接口</param>
@@ -186,7 +186,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 终止化多人对战SDK
+        /// 终止化多人联机SDK
         /// 自动销毁Manager实例
         /// </summary>
         public static void FinalizeSDK()
@@ -252,33 +252,33 @@ namespace TapTapMiniGame
             TapExtManagerHandler.Instance.TapBattle_UpdateRoomProperties(option);
         }
 
-        // === 对战管理API ===
+        // === 帧同步管理API ===
 
         /// <summary>
-        /// 开始对战 - OnlineBattleManager架构
+        /// 开始帧同步 - OnlineBattleManager架构
         /// </summary>
-        /// <param name="option">开始对战选项</param>
-        public static void StartBattle(StartBattleOption option)
+        /// <param name="option">开始帧同步选项</param>
+        public static void StartFrameSync(StartFrameSyncOption option)
         {
-            TapExtManagerHandler.Instance.TapBattle_StartBattle(option);
+            TapExtManagerHandler.Instance.TapBattle_StartFrameSync(option);
         }
 
         /// <summary>
-        /// 发送玩家输入 - OnlineBattleManager架构
+        /// 发送帧同步输入 - OnlineBattleManager架构
         /// </summary>
-        /// <param name="option">发送输入选项</param>
-        public static void SendInput(SendInputOption option)
+        /// <param name="option">发送帧同步输入选项</param>
+        public static void SendFrameInput(SendFrameInputOption option)
         {
-            TapExtManagerHandler.Instance.TapBattle_SendInput(option);
+            TapExtManagerHandler.Instance.TapBattle_SendFrameInput(option);
         }
 
         /// <summary>
-        /// 停止对战 - OnlineBattleManager架构
+        /// 停止帧同步 - OnlineBattleManager架构
         /// </summary>
-        /// <param name="option">停止对战选项</param>
-        public static void StopBattle(StopBattleOption option)
+        /// <param name="option">停止帧同步选项</param>
+        public static void StopFrameSync(StopFrameSyncOption option)
         {
-            TapExtManagerHandler.Instance.TapBattle_StopBattle(option);
+            TapExtManagerHandler.Instance.TapBattle_StopFrameSync(option);
         }
 
         // === 随机数工具API ===
@@ -315,7 +315,7 @@ namespace TapTapMiniGame
         // === 连接管理API ===
 
         /// <summary>
-        /// 连接多人对战服务 - OnlineBattleManager架构
+        /// 连接多人联机服务 - OnlineBattleManager架构
         /// </summary>
         /// <param name="option">连接选项</param>
         public static void Connect(BattleConnectOption option)
@@ -324,7 +324,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 断开多人对战服务连接 - OnlineBattleManager架构
+        /// 断开多人联机服务连接 - OnlineBattleManager架构
         /// </summary>
         /// <param name="option">断开连接选项</param>
         public static void Disconnect(BattleOption option)
@@ -354,7 +354,7 @@ namespace TapTapMiniGame
 
         /// <summary>
         /// 踢玩家出房间 - OnlineBattleManager架构
-        /// 仅限房主调用，且房间未开战时才能使用
+        /// 仅限房主调用，且帧同步未开始时才能使用
         /// </summary>
         /// <param name="option">踢玩家选项</param>
         public static void KickRoomPlayer(KickRoomPlayerOption option)

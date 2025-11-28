@@ -2475,14 +2475,14 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// 多人对战客户端API - Editor环境桥接
+    /// 多人联机客户端API - Editor环境桥接
     /// </summary>
     public partial class TapBattleClient
     {
         #region 生命周期管理
 
         /// <summary>
-        /// 初始化多人对战SDK
+        /// 初始化多人联机SDK
         /// </summary>
         public static void Initialize(ITapBattleEventHandler eventHandler)
         {
@@ -2490,7 +2490,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 终止化多人对战SDK
+        /// 终止化多人联机SDK
         /// </summary>
         public static void FinalizeSDK()
         {
@@ -2502,7 +2502,7 @@ namespace TapTapMiniGame
         #region 连接管理
 
         /// <summary>
-        /// 连接多人对战服务
+        /// 连接多人联机服务
         /// </summary>
         public static void Connect(BattleConnectOption option)
         {
@@ -2510,7 +2510,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 断开多人对战服务连接
+        /// 断开多人联机服务连接
         /// </summary>
         public static void Disconnect(BattleOption option)
         {
@@ -2599,30 +2599,30 @@ namespace TapTapMiniGame
 
         #endregion
 
-        #region 对战管理
+        #region 帧同步管理
 
         /// <summary>
-        /// 开始对战
+        /// 开始帧同步
         /// </summary>
-        public static void StartBattle(StartBattleOption option)
+        public static void StartFrameSync(StartFrameSyncOption option)
         {
-            TapDebugBridge.Battle_StartBattle(option);
+            TapDebugBridge.Battle_StartFrameSync(option);
         }
 
         /// <summary>
-        /// 发送玩家输入
+        /// 发送帧同步输入
         /// </summary>
-        public static void SendInput(SendInputOption option)
+        public static void SendFrameInput(SendFrameInputOption option)
         {
-            TapDebugBridge.Battle_SendInput(option);
+            TapDebugBridge.Battle_SendFrameInput(option);
         }
 
         /// <summary>
-        /// 停止对战
+        /// 停止帧同步
         /// </summary>
-        public static void StopBattle(StopBattleOption option)
+        public static void StopFrameSync(StopFrameSyncOption option)
         {
-            TapDebugBridge.Battle_StopBattle(option);
+            TapDebugBridge.Battle_StopFrameSync(option);
         }
 
         #endregion

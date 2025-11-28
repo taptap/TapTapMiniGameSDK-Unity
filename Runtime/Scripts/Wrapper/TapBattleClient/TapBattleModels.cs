@@ -1,4 +1,5 @@
 using UnityEngine.Scripting;
+using System.Collections.Generic;
 
 namespace TapTapMiniGame
 {
@@ -226,9 +227,9 @@ namespace TapTapMiniGame
         public string customProperties;
         
         /// <summary>
-        /// 匹配参数（从PlayerConfig移过来）
+        /// 匹配参数（Key-Value键值对）
         /// </summary>
-        public MatchParams matchParams;
+        public Dictionary<string, string> matchParams;
     }
 
     /// <summary>
@@ -247,27 +248,8 @@ namespace TapTapMiniGame
         /// 自定义玩家属性（可选，最大2048字节）
         /// </summary>
         public string customProperties;
-        
-        // matchParams 已移动到 RoomConfig 中
     }
 
-    /// <summary>
-    /// 匹配参数
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class MatchParams
-    {
-        /// <summary>
-        /// 玩家等级（改为string类型）
-        /// </summary>
-        public string level;
-        
-        /// <summary>
-        /// 玩家积分（改为string类型）
-        /// </summary>
-        public string score;
-    }
 
     /// <summary>
     /// 创建房间成功响应 - 包含完整房间信息

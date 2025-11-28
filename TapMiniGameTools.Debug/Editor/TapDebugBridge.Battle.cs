@@ -6,15 +6,15 @@ using LitJson;
 using TapServer;
 
 /// <summary>
-/// TapTap多人对战调试桥接类
-/// 用于Unity Editor环境下调试多人对战API
+/// TapTap多人联机调试桥接类
+/// 用于Unity Editor环境下调试多人联机API
 /// </summary>
 public partial class TapDebugBridge
 {
-    #region 多人对战 - 生命周期管理
+    #region 多人联机 - 生命周期管理
 
     /// <summary>
-    /// 初始化多人对战SDK桥接
+    /// 初始化多人联机SDK桥接
     /// </summary>
     public static void Battle_Initialize(ITapBattleEventHandler eventHandler)
     {
@@ -34,7 +34,7 @@ public partial class TapDebugBridge
     }
 
     /// <summary>
-    /// 终止化多人对战SDK桥接
+    /// 终止化多人联机SDK桥接
     /// </summary>
     public static void Battle_FinalizeSDK()
     {
@@ -47,10 +47,10 @@ public partial class TapDebugBridge
 
     #endregion
 
-    #region 多人对战 - 连接管理
+    #region 多人联机 - 连接管理
 
     /// <summary>
-    /// 连接多人对战服务桥接
+    /// 连接多人联机服务桥接
     /// </summary>
     public static void Battle_Connect(BattleConnectOption option)
     {
@@ -74,7 +74,7 @@ public partial class TapDebugBridge
     }
 
     /// <summary>
-    /// 断开多人对战服务连接桥接
+    /// 断开多人联机服务连接桥接
     /// </summary>
     public static void Battle_Disconnect(BattleOption option)
     {
@@ -99,7 +99,7 @@ public partial class TapDebugBridge
 
     #endregion
 
-    #region 多人对战 - 房间管理
+    #region 多人联机 - 房间管理
 
     /// <summary>
     /// 创建房间桥接
@@ -251,7 +251,7 @@ public partial class TapDebugBridge
 
     #endregion
 
-    #region 多人对战 - 玩家属性更新
+    #region 多人联机 - 玩家属性更新
 
     /// <summary>
     /// 更新玩家自定义状态桥接
@@ -330,17 +330,17 @@ public partial class TapDebugBridge
 
     #endregion
 
-    #region 多人对战 - 对战管理
+    #region 多人联机 - 帧同步管理
 
     /// <summary>
-    /// 开始对战桥接
+    /// 开始帧同步桥接
     /// </summary>
-    public static void Battle_StartBattle(StartBattleOption option)
+    public static void Battle_StartFrameSync(StartFrameSyncOption option)
     {
-        string messageData = JsonMapper.ToJson(new { type = "Battle_StartBattle" });
+        string messageData = JsonMapper.ToJson(new { type = "Battle_StartFrameSync" });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[TapDebugBridge] 收到Battle_StartBattle回复: {response.ToJson()}");
+            Debug.Log($"[TapDebugBridge] 收到Battle_StartFrameSync回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -357,15 +357,15 @@ public partial class TapDebugBridge
     }
 
     /// <summary>
-    /// 发送玩家输入桥接
+    /// 发送帧同步输入桥接
     /// </summary>
-    public static void Battle_SendInput(SendInputOption option)
+    public static void Battle_SendFrameInput(SendFrameInputOption option)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
-        string messageData = JsonMapper.ToJson(new { type = "Battle_SendInput", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "Battle_SendFrameInput", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[TapDebugBridge] 收到Battle_SendInput回复: {response.ToJson()}");
+            Debug.Log($"[TapDebugBridge] 收到Battle_SendFrameInput回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -382,14 +382,14 @@ public partial class TapDebugBridge
     }
 
     /// <summary>
-    /// 停止对战桥接
+    /// 停止帧同步桥接
     /// </summary>
-    public static void Battle_StopBattle(StopBattleOption option)
+    public static void Battle_StopFrameSync(StopFrameSyncOption option)
     {
-        string messageData = JsonMapper.ToJson(new { type = "Battle_StopBattle" });
+        string messageData = JsonMapper.ToJson(new { type = "Battle_StopFrameSync" });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[TapDebugBridge] 收到Battle_StopBattle回复: {response.ToJson()}");
+            Debug.Log($"[TapDebugBridge] 收到Battle_StopFrameSync回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
@@ -407,7 +407,7 @@ public partial class TapDebugBridge
 
     #endregion
 
-    #region 多人对战 - 自定义消息
+    #region 多人联机 - 自定义消息
 
     /// <summary>
     /// 发送自定义消息桥接
@@ -436,7 +436,7 @@ public partial class TapDebugBridge
 
     #endregion
 
-    #region 多人对战 - 随机数工具
+    #region 多人联机 - 随机数工具
 
     /// <summary>
     /// 创建随机数生成器桥接

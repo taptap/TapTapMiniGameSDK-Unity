@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.0.14] - 2025.9.24
 ### Added
-1. 新增多人对战模块
+1. 新增多人联机模块
 
 ## [2.0.14] - 2025.9.24
 ### Fixed
