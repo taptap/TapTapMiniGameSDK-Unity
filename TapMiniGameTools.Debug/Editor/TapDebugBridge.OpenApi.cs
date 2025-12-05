@@ -16,10 +16,11 @@ public partial class TapDebugBridge
     /// </summary>
     public static void GetUserInfo(GetUserInfoOption option)
     {
-        string messageData = JsonMapper.ToJson(new { type = "GetUserInfo" });
+        var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
+        string messageData = JsonMapper.ToJson(new { type = "GetUserInfo", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到GetUserInfo回复: {response.ToJson()}");
+            Debug.Log($"[TapDebugBridge] 收到GetUserInfo回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":

@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using LitJson;
 
 namespace TapServer
@@ -40,8 +41,27 @@ namespace TapServer
         private Dictionary<string, ClientInfo> connectedClients = new Dictionary<string, ClientInfo>();
         private List<string> clientIds = new List<string>();
         
-        // 消息回调系统
-        private Dictionary<string, Action<string, ResponseData>> messageCallbacks = new Dictionary<string, Action<string, ResponseData>>();
+        // 客户端连接状态跟踪（用于等待协程）
+        private bool hasClientConnected = false;
+        
+        // 消息回调系统（旧版，保留用于回滚）
+        // private Dictionary<string, Action<string, ResponseData>> messageCallbacks = new Dictionary<string, Action<string, ResponseData>>();
+        
+        
+        // 消息类型回调系统（基于 requestId 的精确匹配）
+        private Dictionary<string, CallbackInfo> requestCallbacks = new Dictionary<string, CallbackInfo>();
+        private readonly object _callbackLock = new object();  // 线程锁，保护requestCallbacks
+        
+        // 消息队列系统
+        private Queue<QueuedRequest> sendQueue = new Queue<QueuedRequest>();
+        private bool isProcessingSendQueue = false;  // 队列处理状态标志
+        private int maxConcurrentRequests = 10;      // 最大并发数
+        private int activeRequestCount = 0;          // 当前活跃请求数
+        private float requestTimeout = 30f;          // 请求超时时间（秒）
+        
+        // 统计信息（用于调试）
+        private int totalQueuedRequests = 0;         // 累计入队请求数
+        private int totalProcessedRequests = 0;      // 累计处理请求数
 
         // 事件回调（保留给高级用户）
         public event Action<string> OnServerStarted;
@@ -65,6 +85,43 @@ namespace TapServer
             public string clientIP;
             public DateTime connectTime;
         }
+
+        /// <summary>
+        /// 回调信息 - 存储单个请求的回调及元数据
+        /// </summary>
+        private class CallbackInfo
+        {
+            public Action<string, ResponseData> Callback;    // 回调函数
+            public DateTime SendTime;                        // 发送时间（用于计算响应时间）
+            public string MessageType;                       // 消息类型（用于日志和匹配）
+            public string RequestId;                         // 请求ID（唯一标识）
+        }
+
+        /// <summary>
+        /// 队列请求 - 存储待发送的消息
+        /// </summary>
+        private class QueuedRequest
+        {
+            public string MessageData;                       // 消息内容
+            public Action<string, ResponseData> Callback;    // 回调函数
+            public DateTime QueueTime;                       // 入队时间（用于监控）
+        }
+
+        /// <summary>
+        /// 并发测试会话 - 追踪测试状态
+        /// </summary>
+        private class ConcurrentTestSession
+        {
+            public string TestId;
+            public int ExpectedCount;
+            public HashSet<int> ReceivedIndices = new HashSet<int>();
+            public DateTime StartTime;
+            public DateTime LastReceiveTime;
+            public int MessageSize;
+        }
+
+        // 测试系统状态
+        private ConcurrentTestSession currentTestSession = null;
 
         #region 单例模式
 
@@ -161,6 +218,7 @@ namespace TapServer
         {
             if (_instance == this)
             {
+                CleanupCallbacks();
                 StopServer();
                 UnsubscribeFromServerEvents();
                 _instance = null;
@@ -197,10 +255,8 @@ namespace TapServer
             // 重置同步缓存
             TapTapMiniGame.TapSyncCache.ResetCache();
             
-            if (enableDebugLog)
-            {
-                Debug.Log($"[TapSDK开发服务器] 初始化完成，端口: {serverPort}，TapEnv数据缓存已重置");
-            }
+            // 始终显示端口信息，方便多Unity实例调试
+            Debug.Log($"[TapSDK开发服务器] ✅ 初始化完成 - 使用端口: {serverPort}，TapEnv数据缓存已重置");
         }
 
         private int FindAvailablePort(int startPort = 8081)
@@ -211,62 +267,105 @@ namespace TapServer
             {
                 if (IsPortAvailable(port))
                 {
-                    if (enableDebugLog)
+                    // 始终显示找到的端口，方便多Unity实例调试
+                    if (port != startPort)
                     {
-                        Debug.Log($"[TapSDK开发服务器] 找到可用端口: {port}");
+                        Debug.Log($"[TapSDK开发服务器] ⚠️ 默认端口 {startPort} 被占用，使用端口: {port}");
                     }
                     return port;
-                }
-                else if (enableDebugLog)
-                {
-                    Debug.Log($"[TapSDK开发服务器] 端口 {port} 已被占用，尝试下一个");
                 }
             }
             
             // 如果所有端口都被占用，返回默认端口（会在启动时报错）
-            Debug.LogWarning($"[TapSDK开发服务器] 端口范围 {startPort}-{maxPort} 全部被占用，使用默认端口 {startPort}");
+            Debug.LogWarning($"[TapSDK开发服务器] ❌ 端口范围 {startPort}-{maxPort} 全部被占用，使用默认端口 {startPort} (可能会失败)");
             return startPort;
         }
 
         /// <summary>
         /// 检查指定端口是否可用
+        /// 使用IPGlobalProperties来检测，不实际占用端口，避免端口释放延迟问题
         /// </summary>
         /// <param name="port">要检查的端口号</param>
         /// <returns>true表示端口可用，false表示被占用</returns>
         private bool IsPortAvailable(int port)
         {
-            System.Net.Sockets.TcpListener listener = null;
             try
             {
-                // 使用TcpListener测试端口
-                listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Any, port);
-                listener.Start();
+                // 方法1: 使用IPGlobalProperties检测端口（推荐，不会实际占用端口）
+                var ipGlobalProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+                
+                // 检查TCP监听端口
+                var tcpListeners = ipGlobalProperties.GetActiveTcpListeners();
+                foreach (var endpoint in tcpListeners)
+                {
+                    if (endpoint.Port == port)
+                    {
+                        if (enableDebugLog)
+                        {
+                            Debug.Log($"[TapSDK开发服务器] 端口 {port} 已被TCP监听占用");
+                        }
+                        return false;
+                    }
+                }
+                
+                // 检查TCP连接端口
+                var tcpConnections = ipGlobalProperties.GetActiveTcpConnections();
+                foreach (var connection in tcpConnections)
+                {
+                    if (connection.LocalEndPoint.Port == port)
+                    {
+                        if (enableDebugLog)
+                        {
+                            Debug.Log($"[TapSDK开发服务器] 端口 {port} 已被TCP连接占用");
+                        }
+                        return false;
+                    }
+                }
+                
                 return true;
-            }
-            catch (System.Net.Sockets.SocketException)
-            {
-                // 端口被占用或其他网络错误
-                return false;
             }
             catch (System.Exception e)
             {
-                // 其他异常，假设端口不可用
+                // 如果IPGlobalProperties方法失败，使用备用方法
                 if (enableDebugLog)
                 {
-                    Debug.LogWarning($"[TapSDK开发服务器] 检查端口 {port} 时出现异常: {e.Message}");
+                    Debug.LogWarning($"[TapSDK开发服务器] IPGlobalProperties检查失败: {e.Message}，使用备用检测方法");
                 }
-                return false;
-            }
-            finally
-            {
-                // 确保在所有情况下都释放监听器
+                
+                // 方法2: 备用方案 - 尝试绑定端口（快速检测）
+                System.Net.Sockets.Socket socket = null;
                 try
                 {
-                    listener?.Stop();
+                    socket = new System.Net.Sockets.Socket(
+                        System.Net.Sockets.AddressFamily.InterNetwork,
+                        System.Net.Sockets.SocketType.Stream,
+                        System.Net.Sockets.ProtocolType.Tcp
+                    );
+                    
+                    socket.SetSocketOption(
+                        System.Net.Sockets.SocketOptionLevel.Socket,
+                        System.Net.Sockets.SocketOptionName.ReuseAddress,
+                        false
+                    );
+                    
+                    socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, port));
+                    return true;
                 }
-                catch
+                catch (System.Net.Sockets.SocketException)
                 {
-                    // 忽略Stop时的异常
+                    return false;
+                }
+                finally
+                {
+                    try
+                    {
+                        socket?.Close();
+                        socket?.Dispose();
+                    }
+                    catch
+                    {
+                        // 忽略释放异常
+                    }
                 }
             }
         }
@@ -301,6 +400,16 @@ namespace TapServer
         #region 简化的公共API
 
         /// <summary>
+        /// 生成唯一的请求ID
+        /// </summary>
+        /// <param name="messageType">消息类型</param>
+        /// <returns>唯一的请求ID</returns>
+        private string GenerateRequestId(string messageType)
+        {
+            return $"{messageType}_{Guid.NewGuid():N}_{DateTime.Now.Ticks}";
+        }
+
+        /// <summary>
         /// 发送消息并设置回调 - 主要API
         /// </summary>
         /// <param name="messageData">要发送的JSON字符串数据（必须包含type字段）</param>
@@ -310,44 +419,202 @@ namespace TapServer
             if (!IsRunning)
             {
                 LogWarning("服务器未运行，无法发送消息");
+                // 立即调用回调返回错误
+                callback?.Invoke("", new ResponseData 
+                { 
+                    status = "error", 
+                    resultJson = "{\"errMsg\":\"服务器未运行\"}" 
+                });
                 return;
             }
 
-            // 尝试从messageData中提取type信息
-            string messageType = null;
+            // 创建队列请求
+            var queuedRequest = new QueuedRequest
+            {
+                MessageData = messageData,
+                Callback = callback,
+                QueueTime = DateTime.Now
+            };
+
+            // 加入队列（线程安全）
+            lock (sendQueue)
+            {
+                sendQueue.Enqueue(queuedRequest);
+                totalQueuedRequests++;
+            }
+
+            if (enableDebugLog)
+            {
+                Debug.Log($"[NetworkServerModule] 📥 消息入队 (队列长度: {sendQueue.Count})");
+            }
+
+            // 启动队列处理协程（如果尚未启动）
+            if (!isProcessingSendQueue)
+            {
+                StartCoroutine(ProcessSendQueueCoroutine());
+            }
+        }
+
+        /// <summary>
+        /// 队列处理协程 - 控制并发发送
+        /// </summary>
+        private System.Collections.IEnumerator ProcessSendQueueCoroutine()
+        {
+            isProcessingSendQueue = true;
+            
+            if (enableDebugLog)
+            {
+                Debug.Log($"[NetworkServerModule] 📤 队列处理协程启动");
+            }
+
+            while (true)
+            {
+                QueuedRequest request = null;
+
+                // 检查队列（线程安全）
+                lock (sendQueue)
+                {
+                    // 调试工具：移除并发限制，只要队列非空就处理
+                    if (sendQueue.Count > 0)
+                    {
+                        request = sendQueue.Dequeue();
+                        
+                        // 检查请求是否超时（在队列中等待过久）
+                        var waitTime = (DateTime.Now - request.QueueTime).TotalSeconds;
+                        if (waitTime > requestTimeout)
+                        {
+                            Debug.LogWarning($"[NetworkServerModule] ⏱️ 请求在队列中超时 (等待{waitTime:F2}秒)");
+                            request.Callback?.Invoke("", new ResponseData 
+                            { 
+                                status = "queue_timeout", 
+                                resultJson = $"{{\"errMsg\":\"队列超时({waitTime:F2}秒)\"}}" 
+                            });
+                            request = null; // 跳过此请求
+                        }
+                    }
+                }
+
+                // 处理请求
+                if (request != null)
+                {
+                    SendMessageInternal(request.MessageData, request.Callback);
+                    totalProcessedRequests++;
+                }
+
+                // 检查退出条件：调试工具模式下，只检查队列是否为空
+                bool shouldExit = false;
+                lock (sendQueue)
+                {
+                    shouldExit = (sendQueue.Count == 0);
+                }
+
+                if (shouldExit)
+                {
+                    isProcessingSendQueue = false;
+                    if (enableDebugLog)
+                    {
+                        Debug.Log($"[NetworkServerModule] ✅ 队列处理完成 (总计: 入队{totalQueuedRequests}, 处理{totalProcessedRequests})");
+                    }
+                    yield break;
+                }
+
+                // 短暂等待，避免CPU占用过高
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
+
+        /// <summary>
+        /// 实际发送消息（内部方法）
+        /// </summary>
+        /// <param name="messageData">消息数据</param>
+        /// <param name="callback">回调函数</param>
+        private void SendMessageInternal(string messageData, Action<string, ResponseData> callback)
+        {
+            string messageType = "unknown";
+            string requestId = null;
+
             try
             {
-                // 直接解析JSON字符串
+                // 1. 解析消息JSON
                 JsonData jsonData = JsonMapper.ToObject(messageData);
+                
                 if (jsonData.ContainsKey("type"))
                 {
                     messageType = jsonData["type"].ToString();
                 }
+
+                // 2. 生成并注入 requestId（如果有回调）
+                if (callback != null)
+                {
+                    requestId = GenerateRequestId(messageType);
+                    jsonData["requestId"] = requestId;
+                    messageData = JsonMapper.ToJson(jsonData);
+                }
+
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[NetworkServerModule] 📤 发送: {messageType}, RequestId: {requestId ?? "无"}");
+                }
             }
             catch (Exception e)
             {
-                LogWarning($"无法从messageData中提取type信息: {e.Message}");
+                LogError($"消息预处理失败: {e.Message}");
+                callback?.Invoke("", new ResponseData 
+                { 
+                    status = "error", 
+                    resultJson = $"{{\"errMsg\":\"预处理失败: {e.Message}\"}}" 
+                });
+                return;
             }
 
-            // 注册回调
-            if (callback != null && !string.IsNullOrEmpty(messageType))
+            // 3. 注册回调（使用 requestId 作为 key）
+            if (callback != null && !string.IsNullOrEmpty(requestId))
             {
-                messageCallbacks[messageType] = callback;
+                lock (_callbackLock)
+                {
+                    requestCallbacks[requestId] = new CallbackInfo
+                    {
+                        Callback = callback,
+                        SendTime = DateTime.Now,
+                        MessageType = messageType,
+                        RequestId = requestId
+                    };
+                    activeRequestCount++;
+                    
+                    if (enableDebugLog)
+                    {
+                        Debug.Log($"[NetworkServerModule] 📝 注册回调: RequestId={requestId}, Type={messageType}, 活跃数={activeRequestCount}");
+                    }
+                }
             }
 
-            // 构造消息
-            var message = new
+            // 4. 构造并发送消息
+            try
             {
-                data = messageData,
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-            };
+                var message = new
+                {
+                    data = messageData,
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                };
 
-            // 发送给所有客户端
-            BroadcastToAll(message);
-
-            if (enableDebugLog)
+                BroadcastToAll(message);
+            }
+            catch (Exception e)
             {
-                Debug.Log($"[TapSDK开发服务器] 发送消息: {messageType ?? "unknown"}");
+                LogError($"发送消息失败: {e.Message}");
+                
+                // 失败时清理回调
+                if (callback != null && !string.IsNullOrEmpty(requestId))
+                {
+                    lock (_callbackLock)
+                    {
+                        if (requestCallbacks.ContainsKey(requestId))
+                        {
+                            requestCallbacks.Remove(requestId);
+                            activeRequestCount--;
+                        }
+                    }
+                }
             }
         }
 
@@ -358,7 +625,44 @@ namespace TapServer
         /// <param name="callback">回调函数</param>
         public void SetMessageCallback(string messageType, Action<string, ResponseData> callback)
         {
-            messageCallbacks[messageType] = callback;
+            // 注意：此方法已废弃，保留用于兼容性
+            // messageCallbacks[messageType] = callback;
+            LogWarning("SetMessageCallback已废弃，现在使用RequestId机制");
+        }
+
+        /// <summary>
+        /// 等待客户端连接的协程
+        /// 用于在游戏初始化流程中等待调试客户端（手机）连接
+        /// </summary>
+        /// <param name="timeout">超时时间（秒），默认30秒</param>
+        /// <returns>协程迭代器</returns>
+        public System.Collections.IEnumerator WaitForClientConnected(float timeout = 30f)
+        {
+            if (enableDebugLog)
+            {
+                Debug.Log($"[TapSDK开发服务器] 等待客户端连接... (超时: {timeout}秒)");
+            }
+            
+            float elapsedTime = 0f;
+            
+            // 等待直到有客户端连接或超时
+            while (!hasClientConnected && elapsedTime < timeout)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
+            if (hasClientConnected)
+            {
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[TapSDK开发服务器] ✅ 客户端已连接，继续执行 (等待时间: {elapsedTime:F2}秒)");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[TapSDK开发服务器] ⏱️ 等待客户端连接超时 ({timeout}秒)，继续执行");
+            }
         }
 
         /// <summary>
@@ -380,6 +684,9 @@ namespace TapServer
 
             try
             {
+                // 重置客户端连接状态
+                hasClientConnected = false;
+                
                 webSocketServer.StartServer();
             }
             catch (Exception e)
@@ -390,11 +697,56 @@ namespace TapServer
         }
 
         /// <summary>
+        /// 清理所有回调和队列
+        /// </summary>
+        private void CleanupCallbacks()
+        {
+            int cleanedCallbacks = 0;
+            int cleanedQueue = 0;
+
+            lock (_callbackLock)
+            {
+                // 清理所有 requestCallbacks
+                cleanedCallbacks = requestCallbacks.Count;
+                
+                if (cleanedCallbacks > 0)
+                {
+                    Debug.LogWarning($"[NetworkServerModule] 🗑️ 清理 {cleanedCallbacks} 个未完成回调");
+                }
+                
+                requestCallbacks.Clear();
+                activeRequestCount = 0;
+            }
+
+            lock (sendQueue)
+            {
+                cleanedQueue = sendQueue.Count;
+                
+                if (cleanedQueue > 0)
+                {
+                    Debug.LogWarning($"[NetworkServerModule] 🗑️ 清理 {cleanedQueue} 个队列消息");
+                }
+                
+                sendQueue.Clear();
+            }
+
+            isProcessingSendQueue = false;
+            
+            if (cleanedCallbacks > 0 || cleanedQueue > 0)
+            {
+                Debug.Log($"[NetworkServerModule] ✅ 清理完成");
+            }
+        }
+
+        /// <summary>
         /// 手动停止服务器
         /// </summary>
         public void StopServer()
         {
             if (webSocketServer == null || !IsRunning) return;
+
+            // 清理所有回调和队列
+            CleanupCallbacks();
 
             try
             {
@@ -450,10 +802,9 @@ namespace TapServer
 
         private void HandleServerStarted(string serverAddress)
         {
-            if (enableDebugLog)
-            {
-                Debug.Log($"[TapSDK开发服务器] ✅ 服务器启动: {serverAddress}");
-            }
+            // 始终显示服务器启动信息，方便多Unity实例调试
+            Debug.Log($"[TapSDK开发服务器] ✅ 服务器启动成功 - 地址: {serverAddress} (端口: {serverPort})");
+            
             OnServerStarted?.Invoke(serverAddress);
         }
 
@@ -481,6 +832,9 @@ namespace TapServer
             connectedClients[clientId] = clientInfo;
             clientIds.Add(clientId);
             
+            // 标记已有客户端连接（用于等待协程）
+            hasClientConnected = true;
+            
             if (enableDebugLog)
             {
                 Debug.Log($"[TapSDK开发服务器] 🔗 客户端连接: {clientIP} (总连接数: {clientIds.Count})");
@@ -505,29 +859,29 @@ namespace TapServer
                 Debug.Log($"[TapSDK开发服务器] 🔄 开始客户端数据同步流程 {clientId}");
             }
             
-            // 同步TapEnv数据
-            yield return StartCoroutine(RequestTapEnvData(clientId));
+            // // 同步TapEnv数据
+            // yield return StartCoroutine(RequestTapEnvData(clientId));
             
-            // 同步SystemInfo数据
-            yield return StartCoroutine(RequestSystemInfoData(clientId));
+            // // 同步SystemInfo数据
+            // yield return StartCoroutine(RequestSystemInfoData(clientId));
             
-            // 同步SystemSetting数据
-            yield return StartCoroutine(RequestSystemSettingData(clientId));
+            // // 同步SystemSetting数据
+            // yield return StartCoroutine(RequestSystemSettingData(clientId));
             
-            // 同步WindowInfo数据
-            yield return StartCoroutine(RequestWindowInfoData(clientId));
+            // // 同步WindowInfo数据
+            // yield return StartCoroutine(RequestWindowInfoData(clientId));
             
-            // 同步DeviceInfo数据
-            yield return StartCoroutine(RequestDeviceInfoData(clientId));
+            // // 同步DeviceInfo数据
+            // yield return StartCoroutine(RequestDeviceInfoData(clientId));
             
-            // 同步AppBaseInfo数据
-            yield return StartCoroutine(RequestAppBaseInfoData(clientId));
+            // // 同步AppBaseInfo数据
+            // yield return StartCoroutine(RequestAppBaseInfoData(clientId));
             
-            // 同步AppAuthorizeSetting数据
-            yield return StartCoroutine(RequestAppAuthorizeSettingData(clientId));
+            // // 同步AppAuthorizeSetting数据
+            // yield return StartCoroutine(RequestAppAuthorizeSettingData(clientId));
             
-            // 同步BatteryInfo数据
-            yield return StartCoroutine(RequestBatteryInfoData(clientId));
+            // // 同步BatteryInfo数据
+            // yield return StartCoroutine(RequestBatteryInfoData(clientId));
             
             if (enableDebugLog)
             {
@@ -550,7 +904,7 @@ namespace TapServer
                 
                 string messageData = JsonMapper.ToJson(requestMessage);
                 
-                // 发送请求
+                // 发送请求（同步API，不等待complete）
                 SendMessage(messageData, (responseClientId, response) =>
                 {
                     // 直接在这里处理TapEnv数据更新
@@ -585,7 +939,7 @@ namespace TapServer
                 
                 string messageData = JsonMapper.ToJson(requestMessage);
                 
-                // 发送请求
+                // 发送请求（同步API，不等待complete）
                 SendMessage(messageData, (responseClientId, response) =>
                 {
                     // 直接在这里处理SystemInfo数据更新
@@ -620,7 +974,7 @@ namespace TapServer
                 
                 string messageData = JsonMapper.ToJson(requestMessage);
                 
-                // 发送请求
+                // 发送请求（同步API，不等待complete）
                 SendMessage(messageData, (responseClientId, response) =>
                 {
                     HandleSystemSettingDataUpdate(responseClientId, response);
@@ -654,6 +1008,7 @@ namespace TapServer
                 
                 string messageData = JsonMapper.ToJson(requestMessage);
                 
+                // 发送请求（同步API，不等待complete）
                 SendMessage(messageData, (responseClientId, response) =>
                 {
                     HandleWindowInfoDataUpdate(responseClientId, response);
@@ -687,6 +1042,7 @@ namespace TapServer
                 
                 string messageData = JsonMapper.ToJson(requestMessage);
                 
+                // 发送请求（同步API，不等待complete）
                 SendMessage(messageData, (responseClientId, response) =>
                 {
                     HandleDeviceInfoDataUpdate(responseClientId, response);
@@ -720,6 +1076,7 @@ namespace TapServer
                 
                 string messageData = JsonMapper.ToJson(requestMessage);
                 
+                // 发送请求（同步API，不等待complete）
                 SendMessage(messageData, (responseClientId, response) =>
                 {
                     HandleAppBaseInfoDataUpdate(responseClientId, response);
@@ -753,6 +1110,7 @@ namespace TapServer
                 
                 string messageData = JsonMapper.ToJson(requestMessage);
                 
+                // 发送请求（同步API，不等待complete）
                 SendMessage(messageData, (responseClientId, response) =>
                 {
                     HandleAppAuthorizeSettingDataUpdate(responseClientId, response);
@@ -786,6 +1144,7 @@ namespace TapServer
                 
                 string messageData = JsonMapper.ToJson(requestMessage);
                 
+                // 发送请求（同步API，不等待complete）
                 SendMessage(messageData, (responseClientId, response) =>
                 {
                     HandleBatteryInfoDataUpdate(responseClientId, response);
@@ -812,6 +1171,25 @@ namespace TapServer
             }
             clientIds.Remove(clientId);
             
+            // 如果所有客户端都断开，清理所有回调
+            if (clientIds.Count == 0)
+            {
+                hasClientConnected = false;
+                
+                // 清理所有 requestCallbacks
+                lock (_callbackLock)
+                {
+                    int clearedCount = requestCallbacks.Count;
+                    requestCallbacks.Clear();
+                    activeRequestCount = 0;
+                    
+                    if (clearedCount > 0 && enableDebugLog)
+                    {
+                        Debug.Log($"[NetworkServerModule] 🗑️ 客户端断开，清理了 {clearedCount} 个回调");
+                    }
+                }
+            }
+            
             if (enableDebugLog)
             {
                 Debug.Log($"[TapSDK开发服务器] ❌ 客户端断开 (剩余连接数: {clientIds.Count})");
@@ -834,13 +1212,26 @@ namespace TapServer
                     {
                         string messageType = jsonData["type"].ToString();
                         
-                        if (enableDebugLog)
+                        // 特殊处理：BattleEvent事件推送
+                        if (messageType == "BattleEvent")
                         {
-                            Debug.Log($"[TapSDK开发服务器] 收到消息类型: {messageType}");
+                            HandleBattleEventMessage(clientId, jsonData);
+                            return;
                         }
                         
+                        // 特殊处理：Debug_TestMessage测试消息
+                        if (messageType == "Debug_TestMessage")
+                        {
+                            HandleDebugTestMessage(clientId, jsonData);
+                            return;
+                        }
 
-                        // 创建ResponseData对象用于回调
+                        if (enableDebugLog)
+                        {
+                            Debug.Log($"[NetworkServerModule] 📩 收到响应-1: {messageType}");
+                        }
+
+                        // 创建ResponseData对象
                         ResponseData responseData = new ResponseData();
                         responseData.type = messageType;
                         
@@ -878,25 +1269,63 @@ namespace TapServer
                             responseData.resultJson = message;
                         }
 
+                        // 提取 requestId
+                        string requestId = null;
+                        if (jsonData.ContainsKey("requestId"))
+                        {
+                            requestId = jsonData["requestId"].ToString();
+                        }
+                        
+                        responseData.requestId = requestId;
+
                         // 触发通用事件
                         OnMessageReceived?.Invoke(clientId, responseData);
 
-                        // 查找并执行回调
-                        if (messageCallbacks.ContainsKey(messageType))
+                        // 基于 requestId 精确匹配回调
+                        if (!string.IsNullOrEmpty(requestId))
                         {
-                            try
+                            lock (_callbackLock)
                             {
-                                messageCallbacks[messageType]?.Invoke(clientId, responseData);
+                                if (requestCallbacks.ContainsKey(requestId))
+                                {
+                                    CallbackInfo callbackInfo = requestCallbacks[requestId];
+                                    var responseTime = (DateTime.Now - callbackInfo.SendTime).TotalMilliseconds;
+
+                                    if (enableDebugLog)
+                                    {
+                                        Debug.Log($"[NetworkServerModule] 📥 收到响应 - RequestId:{requestId}, Type:{callbackInfo.MessageType}, Status:{responseData.status}, ResponseTime:{responseTime:F2}ms");
+                                    }
+
+                                    try
+                                    {
+                                        callbackInfo.Callback?.Invoke(clientId, responseData);
+                                        
+                                        if (enableDebugLog)
+                                        {
+                                            Debug.Log($"[NetworkServerModule] ✅ 回调执行成功 - RequestId:{requestId}, Type:{callbackInfo.MessageType}, Status:{responseData.status}");
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        LogError($"回调执行出错: {e.Message}");
+                                        SendErrorResponse(clientId, messageType, $"回调执行失败: {e.Message}");
+                                    }
+
+                                    // 不删除回调，永久保留
+                                }
+                                else
+                                {
+                                    // 未找到 requestId 对应的回调
+                                    // 过滤 ping/pong 和 BattleEvent
+                                    if (messageType != "ping" && messageType != "pong" && messageType != "BattleEvent")
+                                    {
+                                        if (enableDebugLog)
+                                        {
+                                            Debug.LogWarning($"[NetworkServerModule] ⚠️ 未找到 requestId 对应的回调: {requestId}, Type:{messageType}, Status:{responseData.status}");
+                                        }
+                                    }
+                                }
                             }
-                            catch (Exception e)
-                            {
-                                LogError($"执行消息回调出错 ({messageType}): {e.Message}");
-                                SendErrorResponse(clientId, messageType, $"回调执行失败: {e.Message}");
-                            }
-                        }
-                        else if (enableDebugLog)
-                        {
-                            Debug.Log($"[TapSDK开发服务器] 未找到消息类型 '{messageType}' 的回调处理");
                         }
                     }
                     else
@@ -925,15 +1354,38 @@ namespace TapServer
                     Debug.Log($"[TapSDK开发服务器] 收到文本: {logMessage}");
                 }
                 OnTextMessageReceived?.Invoke(clientId, message);
-                
-                // // 简单回应文本消息
-                // var response = new
-                // {
-                //     type = "text_echo",
-                //     status = "success",
-                //     data = new { originalMessage = message, serverTime = DateTime.Now.ToString() }
-                // };
-                // BroadcastToAll(response);
+            }
+        }
+
+        /// <summary>
+        /// 处理多人联机事件消息
+        /// </summary>
+        /// <param name="clientId">客户端ID</param>
+        /// <param name="message">事件消息JSON数据</param>
+        private void HandleBattleEventMessage(string clientId, JsonData message)
+        {
+            try
+            {
+                if (!message.ContainsKey("eventType") || !message.ContainsKey("eventData"))
+                {
+                    LogError($"[NetworkServerModule] BattleEvent缺少字段: {message.ToJson()}");
+                    return;
+                }
+
+                string eventType = message["eventType"].ToString();
+                JsonData eventData = message["eventData"];
+
+                // 转发到事件管理器
+                TapBattleDebugEventManager.Instance.OnBattleEventReceived(eventType, eventData);
+
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[NetworkServerModule] 📥 {eventType}");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError($"[NetworkServerModule] BattleEvent处理失败 ({message.ToJson()}): {e.Message}");
             }
         }
 
@@ -1386,6 +1838,162 @@ namespace TapServer
         }
         
         #endregion
+        
+        #region 并发测试系统
+        
+        /// <summary>
+        /// 处理调试测试消息
+        /// </summary>
+        private void HandleDebugTestMessage(string clientId, JsonData message)
+        {
+            if (currentTestSession == null)
+            {
+                Debug.LogError("[Debug Test] 收到测试消息，但没有活跃的测试会话");
+                return;
+            }
+            
+            try
+            {
+                string testId = message["testId"].ToString();
+                int messageIndex = int.Parse(message["messageIndex"].ToString());
+                
+                if (testId != currentTestSession.TestId)
+                {
+                    Debug.LogWarning($"[Debug Test] 测试ID不匹配: 期望{currentTestSession.TestId}, 实际{testId}");
+                    return;
+                }
+                
+                currentTestSession.ReceivedIndices.Add(messageIndex);
+                currentTestSession.LastReceiveTime = DateTime.Now;
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[Debug Test] 收到消息 [{messageIndex}/{currentTestSession.ExpectedCount}], 累计收到: {currentTestSession.ReceivedIndices.Count}");
+                }
+                
+                // 检查是否所有消息都已收到
+                if (currentTestSession.ReceivedIndices.Count == currentTestSession.ExpectedCount)
+                {
+                    FinalizeConcurrentTest(true);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[Debug Test] 处理测试消息失败: {e.Message}\n{e.StackTrace}");
+            }
+        }
+        
+        /// <summary>
+        /// 完成测试并输出结果
+        /// </summary>
+        private void FinalizeConcurrentTest(bool completedNormally)
+        {
+            if (currentTestSession == null) return;
+            
+            var elapsed = (currentTestSession.LastReceiveTime - currentTestSession.StartTime).TotalMilliseconds;
+            int receivedCount = currentTestSession.ReceivedIndices.Count;
+            int expectedCount = currentTestSession.ExpectedCount;
+            
+            Debug.Log($"========== 并发测试结果 ==========");
+            Debug.Log($"测试ID: {currentTestSession.TestId}");
+            Debug.Log($"消息大小: {currentTestSession.MessageSize} 字符");
+            Debug.Log($"期望收到: {expectedCount} 条");
+            Debug.Log($"实际收到: {receivedCount} 条");
+            Debug.Log($"总耗时: {elapsed:F0} ms");
+            
+            if (receivedCount == expectedCount)
+            {
+                Debug.Log($"✅ 测试通过！所有消息都已收到");
+            }
+            else
+            {
+                Debug.LogError($"❌ 测试失败！丢失 {expectedCount - receivedCount} 条消息");
+                
+                // 找出丢失的消息编号
+                List<int> missing = new List<int>();
+                for (int i = 1; i <= expectedCount; i++)
+                {
+                    if (!currentTestSession.ReceivedIndices.Contains(i))
+                    {
+                        missing.Add(i);
+                    }
+                }
+                
+                if (missing.Count <= 20)
+                {
+                    Debug.LogError($"丢失的消息编号: {string.Join(", ", missing)}");
+                }
+                else
+                {
+                    Debug.LogError($"丢失的消息编号（前20个）: {string.Join(", ", missing.Take(20))}...");
+                }
+            }
+            
+            Debug.Log($"====================================");
+            
+            currentTestSession = null;
+        }
+        
+        /// <summary>
+        /// 启动并发消息测试
+        /// </summary>
+        public void StartConcurrentMessageTest(int messageCount, int messageSize = 200)
+        {
+            if (currentTestSession != null)
+            {
+                Debug.LogWarning("[Debug Test] 已有测试正在进行，请等待完成");
+                return;
+            }
+            
+            string testId = $"test_{DateTime.Now:yyyyMMdd_HHmmss}_{UnityEngine.Random.Range(1000, 9999)}";
+            
+            currentTestSession = new ConcurrentTestSession
+            {
+                TestId = testId,
+                ExpectedCount = messageCount,
+                MessageSize = messageSize,
+                StartTime = DateTime.Now,
+                LastReceiveTime = DateTime.Now
+            };
+            
+            Debug.Log($"[Debug Test] 启动并发测试: testId={testId}, count={messageCount}, size={messageSize}");
+            
+            // 向Client发送测试指令（需要封装为带 data 字段的格式）
+            var innerCommand = new
+            {
+                type = "Debug_StartConcurrentTest",
+                testId = testId,
+                messageCount = messageCount,
+                messageSize = messageSize
+            };
+            
+            var testCommand = new
+            {
+                data = JsonMapper.ToJson(innerCommand),
+                timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            };
+            
+            BroadcastToAll(testCommand);
+            
+            // 启动超时检测协程（30秒）
+            StartCoroutine(CheckTestTimeout(testId, 30.0f));
+        }
+        
+        /// <summary>
+        /// 检查测试超时
+        /// </summary>
+        private System.Collections.IEnumerator CheckTestTimeout(string testId, float timeoutSeconds)
+        {
+            yield return new WaitForSeconds(timeoutSeconds);
+            
+            if (currentTestSession != null && currentTestSession.TestId == testId)
+            {
+                Debug.LogWarning($"[Debug Test] 测试超时（{timeoutSeconds}秒），强制结束");
+                FinalizeConcurrentTest(false);
+            }
+        }
+        
+        #endregion
     }
     
     public class ResponseData
@@ -1393,6 +2001,7 @@ namespace TapServer
         public string type = "";
         public string status = "";
         public string resultJson = "";
+        public string requestId = "";
 
         public string ToJson()
         {
