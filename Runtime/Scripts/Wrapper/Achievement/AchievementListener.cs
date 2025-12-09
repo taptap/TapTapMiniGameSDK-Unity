@@ -18,11 +18,13 @@ namespace TapTapMiniGame
         public Action<AchievementListenerFail> fail;
     }
 
+    [Preserve]
     public class AchievementListenerSuccess
     {
         public int code;
         public AchievementResult result;
     }
+    [Preserve]
     public class AchievementListenerFail
     {
         public string achievementId;
@@ -30,6 +32,7 @@ namespace TapTapMiniGame
         public string errorMsg;
     }
 
+     [Preserve]
      public class AchievementConstants
     {
         // 未初始化

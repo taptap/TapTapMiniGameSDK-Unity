@@ -70,6 +70,10 @@ public partial class TapDebugBridge
     /// </summary>
     public static WindowInfo GetWindowInfo()
     {
+#if UNITY_EDITOR && TAP_DEBUG_ENABLE
+        // 在Editor环境下使用TapSyncCache缓存的真机数据
+        return TapTapMiniGame.TapSyncCache.GetWindowInfo();
+#else
         return new WindowInfo
         {
             pixelRatio = 1.0f,
@@ -89,6 +93,7 @@ public partial class TapDebugBridge
                 width = 1920
             }
         };
+#endif
     }
 
     /// <summary>
@@ -96,6 +101,10 @@ public partial class TapDebugBridge
     /// </summary>
     public static SystemSetting GetSystemSetting()
     {
+#if UNITY_EDITOR && TAP_DEBUG_ENABLE
+        // 在Editor环境下使用TapSyncCache缓存的真机数据
+        return TapTapMiniGame.TapSyncCache.GetSystemSetting();
+#else
         return new SystemSetting
         {
             bluetoothEnabled = true,
@@ -103,6 +112,7 @@ public partial class TapDebugBridge
             locationEnabled = true,
             wifiEnabled = true
         };
+#endif
     }
     
     /// <summary>
@@ -140,9 +150,15 @@ public partial class TapDebugBridge
 
     /// <summary>
     /// 获取系统信息同步桥接
+    /// 在Editor环境下返回真机缓存的数据，在真机环境下调用原生方法
     /// </summary>
     public static TapTapMiniGame.SystemInfo GetSystemInfoSync()
     {
+#if UNITY_EDITOR && TAP_DEBUG_ENABLE
+        // 在Editor环境下使用TapSyncCache缓存的真机数据
+        return TapTapMiniGame.TapSyncCache.GetSystemInfo();
+#else
+        // 在真机环境下使用原始的模拟数据实现
         return new TapTapMiniGame.SystemInfo
         {
             SDKVersion = "1.0.0",
@@ -158,6 +174,7 @@ public partial class TapDebugBridge
             platform = "windows",
             version = "1.0.0"
         };
+#endif
     }
 
     /// <summary>
@@ -215,6 +232,10 @@ public partial class TapDebugBridge
     /// </summary>
     public static DeviceInfo GetDeviceInfo()
     {
+#if UNITY_EDITOR && TAP_DEBUG_ENABLE
+        // 在Editor环境下使用TapSyncCache缓存的真机数据
+        return TapTapMiniGame.TapSyncCache.GetDeviceInfo();
+#else
         return new DeviceInfo
         {
             brand = "Editor",
@@ -222,6 +243,7 @@ public partial class TapDebugBridge
             platform = "windows",
             system = "Windows"
         };
+#endif
     }
 
     /// <summary>
@@ -229,6 +251,10 @@ public partial class TapDebugBridge
     /// </summary>
     public static AppBaseInfo GetAppBaseInfo()
     {
+#if UNITY_EDITOR && TAP_DEBUG_ENABLE
+        // 在Editor环境下使用TapSyncCache缓存的真机数据
+        return TapTapMiniGame.TapSyncCache.GetAppBaseInfo();
+#else
         return new AppBaseInfo
         {
             SDKVersion = "1.0.0",
@@ -236,6 +262,7 @@ public partial class TapDebugBridge
             language = "zh_CN",
             version = "1.0.0"
         };
+#endif
     }
 
     /// <summary>
@@ -243,6 +270,10 @@ public partial class TapDebugBridge
     /// </summary>
     public static AppAuthorizeSetting GetAppAuthorizeSetting()
     {
+#if UNITY_EDITOR && TAP_DEBUG_ENABLE
+        // 在Editor环境下使用TapSyncCache缓存的真机数据
+        return TapTapMiniGame.TapSyncCache.GetAppAuthorizeSetting();
+#else
         return new AppAuthorizeSetting
         {
             albumAuthorized = "authorized",
@@ -250,6 +281,7 @@ public partial class TapDebugBridge
             locationAuthorized = "authorized",
             microphoneAuthorized = "authorized"
         };
+#endif
     }
 
     /// <summary>
@@ -2171,11 +2203,16 @@ public partial class TapDebugBridge
     /// </summary>
     public static GetBatteryInfoSyncResult GetBatteryInfoSync()
     {
+#if UNITY_EDITOR && TAP_DEBUG_ENABLE
+        // 在Editor环境下使用TapSyncCache缓存的真机数据
+        return TapTapMiniGame.TapSyncCache.GetBatteryInfo();
+#else
         return new GetBatteryInfoSyncResult
         {
             isCharging = false,
             level = 85
         };
+#endif
     }
 
     /// <summary>
@@ -4766,6 +4803,8 @@ public partial class TapDebugBridge
     {
         return null;
     }
+
+
     #endregion
 } 
 #endif 

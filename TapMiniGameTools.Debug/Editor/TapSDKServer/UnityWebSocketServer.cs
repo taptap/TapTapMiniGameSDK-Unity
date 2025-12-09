@@ -104,71 +104,11 @@ namespace TapServer
 
             try
             {
-                // 获取本机IP - 优先使用更可靠的方法
-                IPAddress localAddress = null;
+                // 使用 TapSDKApiUtil 的优化IP获取方法
+                string ipString = TapTapMiniGame.TapSDKApiUtil.GetLocalIPAddress();
+                IPAddress localAddress = IPAddress.Parse(ipString);
                 
-                // 方法1：首先尝试获取网络接口地址（更可靠）
-                try
-                {
-                    var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-                    foreach (var ni in networkInterfaces)
-                    {
-                        if (ni.OperationalStatus == OperationalStatus.Up && 
-                            ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                        {
-                            var ipProperties = ni.GetIPProperties();
-                            foreach (var addr in ipProperties.UnicastAddresses)
-                            {
-                                if (addr.Address.AddressFamily == AddressFamily.InterNetwork &&
-                                    !IPAddress.IsLoopback(addr.Address))
-                                {
-                                    localAddress = addr.Address;
-                                    LogMessage($"Found network interface address: {localAddress}");
-                                    break;
-                                }
-                            }
-                            if (localAddress != null) break;
-                        }
-                    }
-                }
-                catch (Exception networkException)
-                {
-                    LogMessage($"Network interface enumeration failed: {networkException.Message}");
-                }
-                
-                // 方法2：如果网络接口方法失败，尝试DNS解析（可能有localhost配置问题）
-                if (localAddress == null)
-                {
-                    try
-                    {
-                        string hostName = Dns.GetHostName();
-                        LogMessage($"Attempting to resolve hostname: {hostName}");
-                        IPAddress[] addresses = Dns.GetHostAddresses(hostName);
-
-                        // 查找IPv4地址
-                        foreach (IPAddress address in addresses)
-                        {
-                            if (address.AddressFamily == AddressFamily.InterNetwork && 
-                                !IPAddress.IsLoopback(address))
-                            {
-                                localAddress = address;
-                                LogMessage($"Resolved hostname to address: {localAddress}");
-                                break;
-                            }
-                        }
-                    }
-                    catch (Exception dnsException)
-                    {
-                        LogMessage($"DNS resolution failed for hostname: {dnsException.Message}");
-                    }
-                }
-
-                // 方法3：最后的回退方案
-                if (localAddress == null)
-                {
-                    LogMessage("Using fallback address (IPAddress.Any) - may indicate localhost/hosts file configuration issues");
-                    localAddress = IPAddress.Any;
-                }
+                LogMessage($"Using IP from TapSDKApiUtil: {ipString}");
 
                 serverIP = localAddress.ToString();
                 server = new TcpListener(localAddress, port);
@@ -597,6 +537,10 @@ namespace TapServer
         private string id;
         private DateTime lastActivity;
         private bool isConnected;
+        
+        // 半包缓存：用于处理 TCP 流中的不完整 WebSocket 帧
+        private byte[] partialFrameBuffer = null;
+        private int partialFrameLength = 0;
 
         public string Id => id;
         public bool IsConnected => CheckConnectionStatus();
@@ -716,33 +660,81 @@ namespace TapServer
 
             try
             {
-                // 检查是否有数据可读
-                if (!stream.DataAvailable)
+                byte[] workingBuffer;
+                int workingLength;
+
+                // 如果有半包缓存，使用缓存数据
+                if (partialFrameBuffer != null && partialFrameLength > 0)
                 {
-                    if (!tcpClient.Connected || !tcpClient.Client.Connected)
+                    // 尝试读取更多数据来完成半包
+                    if (stream.DataAvailable)
+                    {
+                        byte[] tempBuffer = new byte[8192];
+                        int newBytesRead = stream.Read(tempBuffer, 0, tempBuffer.Length);
+                        
+                        if (newBytesRead > 0)
+                        {
+                            // 合并缓存数据和新数据
+                            byte[] combinedBuffer = new byte[partialFrameLength + newBytesRead];
+                            Array.Copy(partialFrameBuffer, 0, combinedBuffer, 0, partialFrameLength);
+                            Array.Copy(tempBuffer, 0, combinedBuffer, partialFrameLength, newBytesRead);
+                            
+                            workingBuffer = combinedBuffer;
+                            workingLength = partialFrameLength + newBytesRead;
+                            
+                            // 清空缓存（稍后如果还是半包会重新缓存）
+                            partialFrameBuffer = null;
+                            partialFrameLength = 0;
+                        }
+                        else
+                        {
+                            return null; // 没有新数据
+                        }
+                    }
+                    else
+                    {
+                        return null; // 等待更多数据
+                    }
+                }
+                else
+                {
+                    // 检查是否有新数据可读
+                    if (!stream.DataAvailable)
+                    {
+                        if (!tcpClient.Connected || !tcpClient.Client.Connected)
+                        {
+                            isConnected = false;
+                            return null;
+                        }
+                        return null;
+                    }
+
+                    // 读取新数据
+                    byte[] buffer = new byte[8192];
+                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                    
+                    if (bytesRead == 0)
                     {
                         isConnected = false;
                         return null;
                     }
-                    return null;
+                    
+                    workingBuffer = buffer;
+                    workingLength = bytesRead;
                 }
 
-                // 使用更大的缓冲区处理长消息
-                byte[] buffer = new byte[8192]; // 增加到8KB
-                int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                
-                if (bytesRead == 0)
+                // 解析 WebSocket 帧
+                if (workingLength < 2)
                 {
-                    isConnected = false;
+                    // 数据不足，缓存起来
+                    CachePartialFrame(workingBuffer, workingLength);
                     return null;
                 }
-                
-                if (bytesRead < 2) return null;
 
-                bool fin = (buffer[0] & 0x80) != 0;
-                int opcode = buffer[0] & 0x0F;
-                bool masked = (buffer[1] & 0x80) != 0;
-                int payloadLength = buffer[1] & 0x7F;
+                bool fin = (workingBuffer[0] & 0x80) != 0;
+                int opcode = workingBuffer[0] & 0x0F;
+                bool masked = (workingBuffer[1] & 0x80) != 0;
+                int payloadLength = workingBuffer[1] & 0x7F;
                 
                 // 处理关闭帧
                 if (opcode == 8)
@@ -756,50 +748,61 @@ namespace TapServer
                 // 处理扩展长度
                 if (payloadLength == 126)
                 {
-                    if (bytesRead < offset + 2) return null;
-                    payloadLength = (buffer[2] << 8) | buffer[3];
+                    if (workingLength < offset + 2)
+                    {
+                        CachePartialFrame(workingBuffer, workingLength);
+                        return null;
+                    }
+                    payloadLength = (workingBuffer[2] << 8) | workingBuffer[3];
                     offset += 2;
                 }
                 else if (payloadLength == 127)
                 {
-                    if (bytesRead < offset + 8) return null;
+                    if (workingLength < offset + 8)
+                    {
+                        CachePartialFrame(workingBuffer, workingLength);
+                        return null;
+                    }
                     // 只使用低32位
-                    payloadLength = (buffer[6] << 24) | (buffer[7] << 16) | (buffer[8] << 8) | buffer[9];
+                    payloadLength = (workingBuffer[6] << 24) | (workingBuffer[7] << 16) | (workingBuffer[8] << 8) | workingBuffer[9];
                     offset += 8;
                     
                     // 限制最大消息大小
                     if (payloadLength > 1024 * 1024)
                     {
+                        MainThreadDispatcher.SafeLogError($"Message too large: {payloadLength} bytes");
                         isConnected = false;
                         return null;
                     }
                 }
 
+                // 处理掩码
                 byte[] maskingKey = new byte[4];
                 if (masked)
                 {
-                    if (bytesRead < offset + 4) return null;
-                    Array.Copy(buffer, offset, maskingKey, 0, 4);
+                    if (workingLength < offset + 4)
+                    {
+                        CachePartialFrame(workingBuffer, workingLength);
+                        return null;
+                    }
+                    Array.Copy(workingBuffer, offset, maskingKey, 0, 4);
                     offset += 4;
                 }
 
                 // 检查是否有完整的负载数据
-                if (bytesRead < offset + payloadLength)
+                int totalFrameSize = offset + payloadLength;
+                if (workingLength < totalFrameSize)
                 {
-                    // 如果消息不完整且不太大，尝试读取更多数据
-                    if (payloadLength > 0 && payloadLength <= 4096 && stream.DataAvailable)
-                    {
-                        int additionalBytesNeeded = offset + payloadLength - bytesRead;
-                        int additionalBytesRead = stream.Read(buffer, bytesRead, Math.Min(additionalBytesNeeded, buffer.Length - bytesRead));
-                        bytesRead += additionalBytesRead;
-                    }
-                    
-                    if (bytesRead < offset + payloadLength) return null;
+                    // 半包：缓存当前数据，等待下次读取
+                    CachePartialFrame(workingBuffer, workingLength);
+                    return null;
                 }
 
+                // 提取负载数据
                 byte[] payload = new byte[payloadLength];
-                Array.Copy(buffer, offset, payload, 0, payloadLength);
+                Array.Copy(workingBuffer, offset, payload, 0, payloadLength);
 
+                // 解除掩码
                 if (masked)
                 {
                     for (int i = 0; i < payloadLength; i++)
@@ -808,13 +811,37 @@ namespace TapServer
                     }
                 }
 
+                // 如果缓冲区中还有剩余数据（粘包），缓存起来供下次使用
+                int remainingBytes = workingLength - totalFrameSize;
+                if (remainingBytes > 0)
+                {
+                    byte[] remainingBuffer = new byte[remainingBytes];
+                    Array.Copy(workingBuffer, totalFrameSize, remainingBuffer, 0, remainingBytes);
+                    CachePartialFrame(remainingBuffer, remainingBytes);
+                }
+
                 return Encoding.UTF8.GetString(payload);
             }
             catch (Exception e)
             {
                 MainThreadDispatcher.SafeLogError($"WebSocket error: {e.Message}");
                 isConnected = false;
+                partialFrameBuffer = null;
+                partialFrameLength = 0;
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 缓存不完整的 WebSocket 帧数据
+        /// </summary>
+        private void CachePartialFrame(byte[] data, int length)
+        {
+            if (length > 0)
+            {
+                partialFrameBuffer = new byte[length];
+                Array.Copy(data, 0, partialFrameBuffer, 0, length);
+                partialFrameLength = length;
             }
         }
 

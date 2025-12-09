@@ -169,6 +169,217 @@ namespace TapTapMiniGame
             TapExtManagerHandler.Instance.CloudSaveManager_DeleteArchive(option);
         }
     }
+
+    /// <summary>
+    /// Tap多人联机客户端 - OnlineBattleManager架构
+    /// </summary>
+    public class TapBattleClient
+    {
+        /// <summary>
+        /// 初始化多人联机SDK - OnlineBattleManager架构
+        /// 自动创建Manager实例
+        /// </summary>
+        /// <param name="eventHandler">事件处理器，需实现ITapBattleEventHandler接口</param>
+        public static void Initialize(ITapBattleEventHandler eventHandler)
+        {
+            TapExtManagerHandler.Instance.TapBattle_Initialize(eventHandler);
+        }
+
+        /// <summary>
+        /// 取消注册多人联机事件监听器
+        /// </summary>
+        public static void UnregisterListener()
+        {
+            TapExtManagerHandler.Instance.TapBattle_UnregisterListener();
+        }
+
+        /// <summary>
+        /// 终止化多人联机SDK
+        /// 自动销毁Manager实例
+        /// </summary>
+        public static void FinalizeSDK()
+        {
+            TapExtManagerHandler.Instance.TapBattle_Finalize();
+        }
+
+        // === 房间管理API ===
+
+        /// <summary>
+        /// 创建房间 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">创建房间选项</param>
+        public static void CreateRoom(CreateRoomOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_CreateRoom(option);
+        }
+
+        /// <summary>
+        /// 匹配房间 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">匹配房间选项</param>
+        public static void MatchRoom(MatchRoomOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_MatchRoom(option);
+        }
+
+        /// <summary>
+        /// 离开房间 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">离开房间选项</param>
+        public static void LeaveRoom(LeaveRoomOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_LeaveRoom(option);
+        }
+
+        // === 玩家属性更新API ===
+
+        /// <summary>
+        /// 更新玩家自定义状态 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">更新选项</param>
+        public static void UpdatePlayerCustomStatus(UpdatePlayerCustomStatusOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_UpdatePlayerCustomStatus(option);
+        }
+
+        /// <summary>
+        /// 更新玩家自定义属性 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">更新选项</param>
+        public static void UpdatePlayerCustomProperties(UpdatePlayerCustomPropertiesOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_UpdatePlayerCustomProperties(option);
+        }
+
+        /// <summary>
+        /// 更新房间属性 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">更新选项</param>
+        public static void UpdateRoomProperties(UpdateRoomPropertiesOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_UpdateRoomProperties(option);
+        }
+
+        // === 帧同步管理API ===
+
+        /// <summary>
+        /// 开始帧同步 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">开始帧同步选项</param>
+        public static void StartFrameSync(StartFrameSyncOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_StartFrameSync(option);
+        }
+
+        /// <summary>
+        /// 发送帧同步输入 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">发送帧同步输入选项</param>
+        public static void SendFrameInput(SendFrameInputOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_SendFrameInput(option);
+        }
+
+        /// <summary>
+        /// 停止帧同步 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">停止帧同步选项</param>
+        public static void StopFrameSync(StopFrameSyncOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_StopFrameSync(option);
+        }
+
+        // === 随机数工具API ===
+
+        /// <summary>
+        /// 创建随机数生成器
+        /// 创建后会成为当前活跃的随机数生成器实例，native层会自动管理实例
+        /// </summary>
+        /// <param name="seed">随机数种子</param>
+        public static void NewRandomNumberGenerator(int seed)
+        {
+            TapExtManagerHandler.Instance.TapBattle_NewRandomNumberGenerator(seed);
+        }
+
+        /// <summary>
+        /// 生成随机整数
+        /// 使用当前活跃的随机数生成器实例生成随机数
+        /// </summary>
+        /// <returns>随机整数</returns>
+        public static int RandomInt()
+        {
+            return TapExtManagerHandler.Instance.TapBattle_RandomInt();
+        }
+
+        /// <summary>
+        /// 释放当前的随机数生成器
+        /// 释放当前活跃的随机数生成器实例
+        /// </summary>
+        public static void FreeRandomNumberGenerator()
+        {
+            TapExtManagerHandler.Instance.TapBattle_FreeRandomNumberGenerator();
+        }
+
+        // === 连接管理API ===
+
+        /// <summary>
+        /// 连接多人联机服务 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">连接选项</param>
+        public static void Connect(BattleConnectOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_Connect(option);
+        }
+
+        /// <summary>
+        /// 断开多人联机服务连接 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">断开连接选项</param>
+        public static void Disconnect(BattleOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_Disconnect(option);
+        }
+
+        // === 新增API ===
+
+        /// <summary>
+        /// 获取房间列表 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">获取房间列表选项</param>
+        public static void GetRoomList(GetRoomListOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_GetRoomList(option);
+        }
+
+        /// <summary>
+        /// 加入指定房间 - OnlineBattleManager架构
+        /// </summary>
+        /// <param name="option">加入房间选项</param>
+        public static void JoinRoom(JoinRoomOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_JoinRoom(option);
+        }
+
+        /// <summary>
+        /// 踢玩家出房间 - OnlineBattleManager架构
+        /// 仅限房主调用，且帧同步未开始时才能使用
+        /// </summary>
+        /// <param name="option">踢玩家选项</param>
+        public static void KickRoomPlayer(KickRoomPlayerOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_KickRoomPlayer(option);
+        }
+
+        /// <summary>
+        /// 发送自定义消息 - OnlineBattleManager架构
+        /// 每秒允许调用3次，无需等待请求完成的回调
+        /// </summary>
+        /// <param name="option">发送自定义消息选项</param>
+        public static void SendCustomMessage(SendCustomMessageOption option)
+        {
+            TapExtManagerHandler.Instance.TapBattle_SendCustomMessage(option);
+        }
+    }
 }
 
 #endif

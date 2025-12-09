@@ -46,8 +46,8 @@ namespace TapTapMiniGame.Editor
         
         // 调试开关状态
         private bool isDebugEnabled;
-        private bool panelDebugEnabled = false;
-        private bool enableClientBuild;
+        private bool panelDebugEnabled = true;
+        private bool enableClientBuild = true;
         
         // 缓存的服务器信息
         private ServerInfo cachedServerInfo;
@@ -80,6 +80,10 @@ namespace TapTapMiniGame.Editor
             
             // 重置服务器状态追踪
             previousServerRunning = false;
+            
+            // 初始化本地调试工具（加载用户构建配置）
+            GetLocalIPAddress();
+            LoadUserBuildProfiles();
             
             if (isDebugEnabled)
             {
@@ -828,7 +832,7 @@ namespace TapTapMiniGame.Editor
             }
             else
             {
-                Debug.LogWarning("[Auto] Cannot generate QR code: Server address is not available");
+                Debug.Log("[Auto] Cannot generate QR code: Server address is not available");
             }
         }
         
