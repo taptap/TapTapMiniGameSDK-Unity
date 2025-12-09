@@ -7,7 +7,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.0.14] - 2025.9.24
+## [2.0.16] - 2025.11.28
+### Fixed
+1. 多人联机功能完善
+
+## [2.0.15] - 2025.9.24
 ### Added
 1. 新增多人联机模块
 

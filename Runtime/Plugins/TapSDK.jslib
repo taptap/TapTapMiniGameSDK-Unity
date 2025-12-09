@@ -886,6 +886,9 @@ var TapBattleLibrary = {
                     };
                 }
                 
+                // Save listenerConfig for unregisterListener
+                window._tapBattleListenerConfig = listenerConfig;
+                
                 // Call window._tapOnlineBattleManager.registerListener
                 window._tapOnlineBattleManager.registerListener(listenerConfig);
                 console.log("[TapBattle] Tap_Battle_RegisterListener registration completed, " + Object.keys(callbackIds).length + " event callbacks registered");
@@ -895,6 +898,24 @@ var TapBattleLibrary = {
         } catch (error) {
             console.error("[TapBattle] Error in Tap_Battle_RegisterListener:", error.message || "Unknown error");
             console.error(error.message)
+        }
+    },
+
+    Tap_Battle_UnregisterListener: function () {
+        try {
+            if (window._tapOnlineBattleManager && window._tapOnlineBattleManager.unregisterListener) {
+                if (window._tapBattleListenerConfig) {
+                    window._tapOnlineBattleManager.unregisterListener(window._tapBattleListenerConfig);
+                    window._tapBattleListenerConfig = null;
+                    console.log("[TapBattle] Tap_Battle_UnregisterListener completed successfully");
+                } else {
+                    console.warn("[TapBattle] No listenerConfig found, listener may not have been registered");
+                }
+            } else {
+                console.error("[TapBattle] window._tapOnlineBattleManager.unregisterListener method not available");
+            }
+        } catch (error) {
+            console.error("[TapBattle] Error in Tap_Battle_UnregisterListener:", error.message || "Unknown error");
         }
     },
 

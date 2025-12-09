@@ -186,6 +186,14 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
+        /// 取消注册多人联机事件监听器
+        /// </summary>
+        public static void UnregisterListener()
+        {
+            TapExtManagerHandler.Instance.TapBattle_UnregisterListener();
+        }
+
+        /// <summary>
         /// 终止化多人联机SDK
         /// 自动销毁Manager实例
         /// </summary>

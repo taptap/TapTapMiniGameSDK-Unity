@@ -1,0 +1,8 @@
+2025-12-05 16:55:20,412 - sync_engine - INFO - 已设置 2 个默认规则（包含Claude专用规则）
+2025-12-05 16:55:20,412 - sync_engine - INFO - MD同步引擎初始化完成
+2025-12-05 16:55:22,417 - sync_engine - INFO - 开始同步文件: API变更文档_1dc251f至最新版本.md
+2025-12-05 16:55:23,729 - apple_bridge - INFO - 📁 创建文件夹成功: Claude/TapTapMiniGameSDK_Unity
+2025-12-05 16:55:24,304 - apple_bridge - INFO - ✅ 创建备忘录成功: API变更文档_1dc251f至最新版本
+2025-12-05 16:55:24,304 - rules.base_rule.ClaudeAutoSyncRule - INFO - 📝 创建Claude文档: API变更文档_1dc251f至最新版本
+2025-12-05 16:55:24,305 - sync_engine - INFO - 应用了 2 个规则: Claude自动同步, 文件类型过滤
+2025-12-05 16:55:24,305 - sync_engine - INFO - ✅ 同步完成: API变更文档_1dc251f至最新版本.md

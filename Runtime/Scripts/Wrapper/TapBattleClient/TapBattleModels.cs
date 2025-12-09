@@ -270,11 +270,11 @@ namespace TapTapMiniGame
     }
     
     /// <summary>
-    /// 房间信息
+    /// 房间基础信息 - 用于房间列表等仅包含基本属性的场景
     /// </summary>
     [Preserve]
     [System.Serializable]
-    public class RoomInfo
+    public class RoomBaseInfo
     {
         /// <summary>
         /// 创建时间 (时间戳)
@@ -300,7 +300,16 @@ namespace TapTapMiniGame
         /// 房间名称
         /// </summary>
         public string name;
-        
+    }
+    
+    /// <summary>
+    /// 房间完整信息 - 继承基础信息并添加详细属性
+    /// 用于创建房间、加入房间等需要完整信息的场景
+    /// </summary>
+    [Preserve]
+    [System.Serializable]
+    public class RoomInfo : RoomBaseInfo
+    {
         /// <summary>
         /// 房主ID
         /// </summary>
@@ -315,6 +324,20 @@ namespace TapTapMiniGame
         /// 房间类型
         /// </summary>
         public string type;
+    }
+    
+    /// <summary>
+    /// 房间列表信息 - 继承基础信息并添加当前人数
+    /// 用于获取房间列表API返回，包含实时人数但不包含详细玩家列表
+    /// </summary>
+    [Preserve]
+    [System.Serializable]
+    public class RoomListInfo : RoomBaseInfo
+    {
+        /// <summary>
+        /// 房间当前人数
+        /// </summary>
+        public int playerCount;
     }
     
     /// <summary>
@@ -420,9 +443,9 @@ namespace TapTapMiniGame
     public class GetRoomListSuccessResponse
     {
         /// <summary>
-        /// 房间列表
+        /// 房间列表（包含基础信息和当前人数，不含ownerId、players、type）
         /// </summary>
-        public RoomInfo[] rooms;
+        public RoomListInfo[] rooms;
 
         /// <summary>
         /// 错误消息 (成功时为 "getRoomList:ok")
