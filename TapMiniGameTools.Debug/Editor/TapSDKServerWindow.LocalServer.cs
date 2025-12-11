@@ -33,7 +33,7 @@ namespace TapTapMiniGame.Editor
         /// <summary>
         /// 小游戏包的CDN下载地址
         /// </summary>
-        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/7900f1de1a645a1c119db41ba0d3d266.zip";
+        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/2025-12-11/dc7c1e3969ac0d1ab81c25c73a743d83.zip";
 
         /// <summary>
         /// 本地调试文件存储目录
