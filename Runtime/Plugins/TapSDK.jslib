@@ -830,24 +830,24 @@ var TapBattleLibrary = {
                     };
                 }
                 
-                if (callbackIds.onBattleStop) {
-                    listenerConfig.onBattleStop = (info) => {
-                        console.log("[TapBattle] onBattleStop:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onBattleStop, "success", info);
+                if (callbackIds.onFrameSyncStop) {
+                    listenerConfig.onFrameSyncStop = (info) => {
+                        console.log("[TapBattle] onFrameSyncStop:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onFrameSyncStop, "success", info);
                     };
                 }
-                
-                if (callbackIds.onBattleFrame) {
-                    listenerConfig.onBattleFrame = (info) => {
-                        console.log("[TapBattle] onBattleFrame:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onBattleFrame, "success", info);
+
+                if (callbackIds.onFrame) {
+                    listenerConfig.onFrame = (info) => {
+                        console.log("[TapBattle] onFrame:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onFrame, "success", info);
                     };
                 }
-                
-                if (callbackIds.onBattleStart) {
-                    listenerConfig.onBattleStart = (info) => {
-                        console.log("[TapBattle] onBattleStart:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onBattleStart, "success", info);
+
+                if (callbackIds.onFrameSyncStart) {
+                    listenerConfig.onFrameSyncStart = (info) => {
+                        console.log("[TapBattle] onFrameSyncStart:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onFrameSyncStart, "success", info);
                     };
                 }
                 
