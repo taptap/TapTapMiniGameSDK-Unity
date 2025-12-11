@@ -145,20 +145,20 @@ namespace TapServer
                     break;
 
                 // 帧同步事件
-                case "OnBattleStart":
+                case "OnFrameSyncStart":
                     var battleStartInfo = JsonMapper.ToObject<FrameSyncStartInfo>(eventDataJson);
                     registeredEventHandler.OnFrameSyncStart(battleStartInfo);
                     Debug.Log($"[TapBattleDebugEventManager] ▶️ OnFrameSyncStart: seed={battleStartInfo.seed}");
                     break;
 
-                case "OnBattleFrame":
+                case "OnFrameInput":
                     // frameData是字符串类型，直接提取
                     string frameData = eventData.ToString();
                     registeredEventHandler.OnFrameInput(frameData);
                     // 帧数据频繁，不输出日志
                     break;
 
-                case "OnBattleStop":
+                case "OnFrameSyncStop":
                         var battleStopInfo = JsonMapper.ToObject<FrameSyncStopInfo>(eventDataJson);
                         registeredEventHandler.OnFrameSyncStop(battleStopInfo);
                     Debug.Log($"[TapBattleDebugEventManager] ⏹️ OnFrameSyncStop");

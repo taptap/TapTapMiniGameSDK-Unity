@@ -45,6 +45,26 @@ public partial class TapDebugBridge
         });
     }
 
+    /// <summary>
+    /// 取消注册多人联机事件监听器桥接
+    /// </summary>
+    public static void Battle_UnregisterListener()
+    {
+        // 1. 清除事件管理器中的事件处理器
+        TapBattleDebugEventManager.Instance.UnregisterEventHandler();
+        
+        // 2. 发送UnregisterListener消息到真机
+        string messageData = JsonMapper.ToJson(new { type = "Battle_UnregisterListener" });
+        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        {
+            Debug.Log($"[TapDebugBridge] 收到Battle_UnregisterListener回复: {response.ToJson()}");
+            if (response.status == "success")
+            {
+                Debug.Log("[TapDebugBridge] 多人联机事件监听器已取消注册");
+            }
+        });
+    }
+
     #endregion
 
     #region 多人联机 - 连接管理

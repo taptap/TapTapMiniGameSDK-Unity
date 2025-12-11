@@ -1,4 +1,4 @@
-﻿#if (UNITY_WEBGL || UNITY_MINIGAME) && UNITY_EDITOR && TAP_DEBUG_ENABLE
+#if (UNITY_WEBGL || UNITY_MINIGAME) && UNITY_EDITOR && TAP_DEBUG_ENABLE
 using System;
 
 namespace TapTapMiniGame
@@ -2487,6 +2487,14 @@ namespace TapTapMiniGame
         public static void Initialize(ITapBattleEventHandler eventHandler)
         {
             TapDebugBridge.Battle_Initialize(eventHandler);
+        }
+
+        /// <summary>
+        /// 取消注册多人联机事件监听器
+        /// </summary>
+        public static void UnregisterListener()
+        {
+            TapDebugBridge.Battle_UnregisterListener();
         }
 
         /// <summary>
