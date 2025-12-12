@@ -255,8 +255,12 @@ const TapCloudSaveLibrary = {
                 },
                 archiveFilePath: csharpArgs.archiveFilePath,
                 success: function(res) {
+                    const convertedRes = {
+                        archiveId: res.uuid || "", // uuid -> archiveId
+                        fileId: res.fileId || ""   // Keep fileId
+                    };
 
-                    _Tap_JSCallback(callbackIdStr, "success", res);
+                    _Tap_JSCallback(callbackIdStr, "success", convertedRes);
                 },
                 fail: function(errMsg, errno) {
 

@@ -617,6 +617,7 @@ namespace TapTapMiniGame
     public class BattleServiceErrorNotification
     {
         public string errorMessage;
+        public int errorCode;  // 错误码
     }
 
     /// <summary>

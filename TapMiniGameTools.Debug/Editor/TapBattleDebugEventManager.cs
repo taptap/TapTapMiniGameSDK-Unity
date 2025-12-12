@@ -115,14 +115,14 @@ namespace TapServer
                     break;
 
                 case "OnPlayerCustomStatusChange":
-                    var statusInfo = JsonMapper.ToObject<PlayerCustomStatusChangeInfo>(eventDataJson);
+                    var statusInfo = JsonMapper.ToObject<PlayerCustomStatusNotification>(eventDataJson);
                     registeredEventHandler.OnPlayerCustomStatusChange(statusInfo);
                     Debug.Log($"[TapBattleDebugEventManager] ⚡ OnPlayerCustomStatusChange");
                     break;
 
                 case "OnPlayerCustomPropertiesChange":
                     // 直接从JsonData提取字段，避免LitJson的双重JSON解析bug
-                    var propInfo = new PlayerCustomPropertiesChangeInfo
+                    var propInfo = new PlayerCustomPropertiesNotification
                     {
                         playerId = eventData["playerId"]?.ToString(),
                         properties = eventData["properties"]?.ToString()  // 保持JSON字符串格式
@@ -134,7 +134,7 @@ namespace TapServer
                 // 房间属性事件
                 case "OnRoomPropertiesChange":
                     // 直接从JsonData提取字段，避免LitJson的双重JSON解析bug
-                    var roomInfo = new RoomPropertiesChangeInfo
+                    var roomInfo = new RoomPropertiesNotification
                     {
                         id = eventData["id"]?.ToString(),
                         name = eventData["name"]?.ToString(),
@@ -166,7 +166,7 @@ namespace TapServer
 
                 // 消息事件
                 case "OnCustomMessage":
-                    var customMsgInfo = JsonMapper.ToObject<CustomMessageInfo>(eventDataJson);
+                    var customMsgInfo = JsonMapper.ToObject<CustomMessageNotification>(eventDataJson);
                     registeredEventHandler.OnCustomMessage(customMsgInfo);
                     Debug.Log($"[TapBattleDebugEventManager] 💬 OnCustomMessage");
                     break;
