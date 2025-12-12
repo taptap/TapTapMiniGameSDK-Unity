@@ -90,13 +90,13 @@ namespace TapServer
             {
                 // 房间事件
                 case "OnPlayerEnterRoom":
-                    var enterInfo = JsonMapper.ToObject<PlayerEnterRoomInfo>(eventDataJson);
+                    var enterInfo = JsonMapper.ToObject<EnterRoomNotification>(eventDataJson);
                     registeredEventHandler.OnPlayerEnterRoom(enterInfo);
                     Debug.Log($"[TapBattleDebugEventManager] 📥 OnPlayerEnterRoom");
                     break;
 
                 case "OnPlayerLeaveRoom":
-                    var leaveInfo = JsonMapper.ToObject<PlayerLeaveRoomInfo>(eventDataJson);
+                    var leaveInfo = JsonMapper.ToObject<LeaveRoomNotification>(eventDataJson);
                     registeredEventHandler.OnPlayerLeaveRoom(leaveInfo);
                     Debug.Log($"[TapBattleDebugEventManager] 📤 OnPlayerLeaveRoom");
                     break;
@@ -109,7 +109,7 @@ namespace TapServer
 
                 // 玩家事件
                 case "OnPlayerOffline":
-                    var offlineInfo = JsonMapper.ToObject<PlayerOfflineInfo>(eventDataJson);
+                    var offlineInfo = JsonMapper.ToObject<PlayerOfflineNotification>(eventDataJson);
                     registeredEventHandler.OnPlayerOffline(offlineInfo);
                     Debug.Log($"[TapBattleDebugEventManager] 📴 OnPlayerOffline");
                     break;

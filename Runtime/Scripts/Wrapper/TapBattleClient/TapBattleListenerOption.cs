@@ -21,9 +21,9 @@ public class TapOnlineBattleListenerOption
     public Action<FrameSyncStopInfo> onBattleStop;
     public Action<string> onBattleFrame;
     public Action<FrameSyncStartInfo> onBattleStart;
-    public Action<PlayerOfflineInfo> playerOffline;
-    public Action<PlayerLeaveRoomInfo> playerLeaveRoom;
-    public Action<PlayerEnterRoomInfo> playerEnterRoom;
+    public Action<PlayerOfflineNotification> playerOffline;
+    public Action<LeaveRoomNotification> playerLeaveRoom;
+    public Action<EnterRoomNotification> playerEnterRoom;
     public Action<CustomMessageInfo> onCustomMessage;
     public Action<PlayerKickedInfo> onPlayerKicked;
 }
@@ -142,46 +142,6 @@ public class FrameSyncStartInfo
 
     [Preserve]
     public FrameSyncStartInfo() { }
-}
-
-/// <summary>
-/// 玩家离线信息
-/// </summary>
-[Preserve]
-public class PlayerOfflineInfo
-{
-    public string playerId;
-    public string playerName;
-    
-    [Preserve]
-    public PlayerOfflineInfo() { }
-}
-
-/// <summary>
-/// 玩家离开房间信息
-/// </summary>
-[Preserve]
-public class PlayerLeaveRoomInfo
-{
-    public string playerId;
-    public string playerName;
-    public string roomId;
-    
-    [Preserve]
-    public PlayerLeaveRoomInfo() { }
-}
-
-/// <summary>
-/// 玩家进入房间信息
-/// </summary>
-[Preserve]
-public class PlayerEnterRoomInfo
-{
-    public string roomId;
-    public PlayerInfo playerInfo;
-    
-    [Preserve]
-    public PlayerEnterRoomInfo() { }
 }
 
 /// <summary>

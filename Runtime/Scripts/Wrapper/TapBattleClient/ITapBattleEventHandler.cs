@@ -57,17 +57,17 @@ namespace TapTapMiniGame
         /// <summary>
         /// 玩家离线通知
         /// </summary>
-        public void OnPlayerOffline(PlayerOfflineInfo info);
+        public void OnPlayerOffline(PlayerOfflineNotification info);
 
         /// <summary>
         /// 玩家离开房间通知
         /// </summary>
-        public void OnPlayerLeaveRoom(PlayerLeaveRoomInfo info);
+        public void OnPlayerLeaveRoom(LeaveRoomNotification info);
 
         /// <summary>
         /// 玩家进入房间通知
         /// </summary>
-        public void OnPlayerEnterRoom(PlayerEnterRoomInfo info);
+        public void OnPlayerEnterRoom(EnterRoomNotification info);
 
         /// <summary>
         /// 自定义消息通知
