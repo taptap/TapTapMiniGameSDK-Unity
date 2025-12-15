@@ -27,17 +27,17 @@ namespace TapTapMiniGame
         /// <summary>
         /// 房间属性变更通知
         /// </summary>
-        public void OnRoomPropertiesChange(RoomPropertiesChangeInfo info);
+        public void OnRoomPropertiesChange(RoomPropertiesNotification info);
 
         /// <summary>
         /// 玩家自定义属性变更通知
         /// </summary>
-        public void OnPlayerCustomPropertiesChange(PlayerCustomPropertiesChangeInfo info);
+        public void OnPlayerCustomPropertiesChange(PlayerCustomPropertiesNotification info);
 
         /// <summary>
         /// 玩家自定义状态变更通知
         /// </summary>
-        public void OnPlayerCustomStatusChange(PlayerCustomStatusChangeInfo info);
+        public void OnPlayerCustomStatusChange(PlayerCustomStatusNotification info);
 
         /// <summary>
         /// 帧同步停止通知
@@ -57,22 +57,22 @@ namespace TapTapMiniGame
         /// <summary>
         /// 玩家离线通知
         /// </summary>
-        public void OnPlayerOffline(PlayerOfflineInfo info);
+        public void OnPlayerOffline(PlayerOfflineNotification info);
 
         /// <summary>
         /// 玩家离开房间通知
         /// </summary>
-        public void OnPlayerLeaveRoom(PlayerLeaveRoomInfo info);
+        public void OnPlayerLeaveRoom(LeaveRoomNotification info);
 
         /// <summary>
         /// 玩家进入房间通知
         /// </summary>
-        public void OnPlayerEnterRoom(PlayerEnterRoomInfo info);
+        public void OnPlayerEnterRoom(EnterRoomNotification info);
 
         /// <summary>
         /// 自定义消息通知
         /// </summary>
-        public void OnCustomMessage(CustomMessageInfo info);
+        public void OnCustomMessage(CustomMessageNotification info);
 
         /// <summary>
         /// 玩家被踢出房间通知
