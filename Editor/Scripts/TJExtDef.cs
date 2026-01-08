@@ -90,6 +90,16 @@ namespace TapTapMiniGame
 #else
             TJExtEnvDef.SETDEF("WEIXINMINIGAME", false);
 #endif
+#if UNITY_MINIGAME
+            TJExtEnvDef.SETDEF("UNITY_MINIGAME", true);
+#else
+            TJExtEnvDef.SETDEF("UNITY_MINIGAME", false);
+#endif
+#if MINIGAME_SUBPLATFORM_TAPTAP
+            TJExtEnvDef.SETDEF("MINIGAME_SUBPLATFORM_TAPTAP", true);
+#else
+            TJExtEnvDef.SETDEF("MINIGAME_SUBPLATFORM_TAPTAP", false);
+#endif
 #if TUANJIE_2022_3_OR_NEWER
             TJExtEnvDef.SETDEF("TUANJIE_2022_3_OR_NEWER", true);
 #else
