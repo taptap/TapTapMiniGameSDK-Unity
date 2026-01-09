@@ -171,12 +171,12 @@ namespace TapTapMiniGame
     }
 
     /// <summary>
-    /// Tap多人联机客户端 - OnlineBattleManager架构
+    /// Tap多人联机客户端
     /// </summary>
     public class TapBattleClient
     {
         /// <summary>
-        /// 初始化多人联机SDK - OnlineBattleManager架构
+        /// 初始化多人联机SDK
         /// 自动创建Manager实例
         /// </summary>
         /// <param name="eventHandler">事件处理器，需实现ITapBattleEventHandler接口</param>
@@ -205,7 +205,7 @@ namespace TapTapMiniGame
         // === 房间管理API ===
 
         /// <summary>
-        /// 创建房间 - OnlineBattleManager架构
+        /// 创建房间
         /// </summary>
         /// <param name="option">创建房间选项</param>
         public static void CreateRoom(CreateRoomOption option)
@@ -214,7 +214,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 匹配房间 - OnlineBattleManager架构
+        /// 匹配房间
         /// </summary>
         /// <param name="option">匹配房间选项</param>
         public static void MatchRoom(MatchRoomOption option)
@@ -223,7 +223,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 离开房间 - OnlineBattleManager架构
+        /// 离开房间
         /// </summary>
         /// <param name="option">离开房间选项</param>
         public static void LeaveRoom(LeaveRoomOption option)
@@ -234,7 +234,7 @@ namespace TapTapMiniGame
         // === 玩家属性更新API ===
 
         /// <summary>
-        /// 更新玩家自定义状态 - OnlineBattleManager架构
+        /// 更新玩家自定义状态
         /// </summary>
         /// <param name="option">更新选项</param>
         public static void UpdatePlayerCustomStatus(UpdatePlayerCustomStatusOption option)
@@ -243,7 +243,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 更新玩家自定义属性 - OnlineBattleManager架构
+        /// 更新玩家自定义属性
         /// </summary>
         /// <param name="option">更新选项</param>
         public static void UpdatePlayerCustomProperties(UpdatePlayerCustomPropertiesOption option)
@@ -252,7 +252,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 更新房间属性 - OnlineBattleManager架构
+        /// 更新房间属性
         /// </summary>
         /// <param name="option">更新选项</param>
         public static void UpdateRoomProperties(UpdateRoomPropertiesOption option)
@@ -263,7 +263,7 @@ namespace TapTapMiniGame
         // === 帧同步管理API ===
 
         /// <summary>
-        /// 开始帧同步 - OnlineBattleManager架构
+        /// 开始帧同步
         /// </summary>
         /// <param name="option">开始帧同步选项</param>
         public static void StartFrameSync(StartFrameSyncOption option)
@@ -272,7 +272,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 发送帧同步输入 - OnlineBattleManager架构
+        /// 发送帧同步输入
         /// </summary>
         /// <param name="option">发送帧同步输入选项</param>
         public static void SendFrameInput(SendFrameInputOption option)
@@ -281,7 +281,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 停止帧同步 - OnlineBattleManager架构
+        /// 停止帧同步
         /// </summary>
         /// <param name="option">停止帧同步选项</param>
         public static void StopFrameSync(StopFrameSyncOption option)
@@ -293,37 +293,19 @@ namespace TapTapMiniGame
 
         /// <summary>
         /// 创建随机数生成器
-        /// 创建后会成为当前活跃的随机数生成器实例，native层会自动管理实例
         /// </summary>
         /// <param name="seed">随机数种子</param>
-        public static void NewRandomNumberGenerator(int seed)
+        /// <returns>随机数生成器实例</returns>
+        public static RandomNumberGenerator NewRandomNumberGenerator(int seed)
         {
-            TapExtManagerHandler.Instance.TapBattle_NewRandomNumberGenerator(seed);
-        }
-
-        /// <summary>
-        /// 生成随机整数
-        /// 使用当前活跃的随机数生成器实例生成随机数
-        /// </summary>
-        /// <returns>随机整数</returns>
-        public static int RandomInt()
-        {
-            return TapExtManagerHandler.Instance.TapBattle_RandomInt();
-        }
-
-        /// <summary>
-        /// 释放当前的随机数生成器
-        /// 释放当前活跃的随机数生成器实例
-        /// </summary>
-        public static void FreeRandomNumberGenerator()
-        {
-            TapExtManagerHandler.Instance.TapBattle_FreeRandomNumberGenerator();
+            int instanceId = TapExtManagerHandler.Instance.TapBattle_NewRandomNumberGenerator(seed);
+            return new RandomNumberGenerator(instanceId);
         }
 
         // === 连接管理API ===
 
         /// <summary>
-        /// 连接多人联机服务 - OnlineBattleManager架构
+        /// 连接多人联机服务
         /// </summary>
         /// <param name="option">连接选项</param>
         public static void Connect(BattleConnectOption option)
@@ -332,7 +314,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 断开多人联机服务连接 - OnlineBattleManager架构
+        /// 断开多人联机服务连接
         /// </summary>
         /// <param name="option">断开连接选项</param>
         public static void Disconnect(BattleOption option)
@@ -343,7 +325,7 @@ namespace TapTapMiniGame
         // === 新增API ===
 
         /// <summary>
-        /// 获取房间列表 - OnlineBattleManager架构
+        /// 获取房间列表
         /// </summary>
         /// <param name="option">获取房间列表选项</param>
         public static void GetRoomList(GetRoomListOption option)
@@ -352,7 +334,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 加入指定房间 - OnlineBattleManager架构
+        /// 加入指定房间
         /// </summary>
         /// <param name="option">加入房间选项</param>
         public static void JoinRoom(JoinRoomOption option)
@@ -361,7 +343,7 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 踢玩家出房间 - OnlineBattleManager架构
+        /// 踢玩家出房间
         /// 仅限房主调用，且帧同步未开始时才能使用
         /// </summary>
         /// <param name="option">踢玩家选项</param>
@@ -371,13 +353,44 @@ namespace TapTapMiniGame
         }
 
         /// <summary>
-        /// 发送自定义消息 - OnlineBattleManager架构
-        /// 每秒允许调用3次，无需等待请求完成的回调
+        /// 发送自定义消息
         /// </summary>
         /// <param name="option">发送自定义消息选项</param>
         public static void SendCustomMessage(SendCustomMessageOption option)
         {
             TapExtManagerHandler.Instance.TapBattle_SendCustomMessage(option);
+        }
+    }
+    
+    public class RandomNumberGenerator
+    {
+        private readonly int instanceId;
+        private bool isFreed = false;
+        
+        internal RandomNumberGenerator(int instanceId)
+        {
+            this.instanceId = instanceId;
+        }
+        
+        public int RandomInt()
+        {
+            if (isFreed)
+            {
+                throw new InvalidOperationException("RandomNumberGenerator has been freed");
+            }
+            
+            return TapExtManagerHandler.Instance.TapBattle_RandomInt(instanceId);
+        }
+        
+        public void Free()
+        {
+            if (isFreed)
+            {
+                return; // 已经释放过了，避免重复释放
+            }
+            
+            TapExtManagerHandler.Instance.TapBattle_FreeRandomNumberGenerator(instanceId);
+            isFreed = true;
         }
     }
 }

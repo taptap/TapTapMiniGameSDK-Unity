@@ -27,32 +27,32 @@ namespace TapTapMiniGame
         /// <summary>
         /// 房间属性变更通知
         /// </summary>
-        public void OnRoomPropertiesChange(RoomPropertiesNotification info);
+        public void OnRoomPropertiesChanged(RoomPropertiesNotification info);
 
         /// <summary>
         /// 玩家自定义属性变更通知
         /// </summary>
-        public void OnPlayerCustomPropertiesChange(PlayerCustomPropertiesNotification info);
+        public void OnPlayerCustomPropertiesChanged(PlayerCustomPropertiesNotification info);
 
         /// <summary>
         /// 玩家自定义状态变更通知
         /// </summary>
-        public void OnPlayerCustomStatusChange(PlayerCustomStatusNotification info);
+        public void OnPlayerCustomStatusChanged(PlayerCustomStatusNotification info);
 
         /// <summary>
         /// 帧同步停止通知
         /// </summary>
-        public void OnFrameSyncStop(FrameSyncStopInfo info);
+        public void OnFrameSyncStopped(FrameSyncStopInfo info);
 
         /// <summary>
         /// 帧同步数据通知
         /// </summary>
-        public void OnFrameInput(string frameData);
+        public void OnFrameReceived(FrameData frameData);
 
         /// <summary>
         /// 帧同步开始通知
         /// </summary>
-        public void OnFrameSyncStart(FrameSyncStartInfo info);
+        public void OnFrameSyncStarted(FrameSyncStartInfo info);
 
         /// <summary>
         /// 玩家离线通知
@@ -62,17 +62,17 @@ namespace TapTapMiniGame
         /// <summary>
         /// 玩家离开房间通知
         /// </summary>
-        public void OnPlayerLeaveRoom(LeaveRoomNotification info);
+        public void OnPlayerLeft(LeaveRoomNotification info);
 
         /// <summary>
         /// 玩家进入房间通知
         /// </summary>
-        public void OnPlayerEnterRoom(EnterRoomNotification info);
+        public void OnPlayerEntered(EnterRoomNotification info);
 
         /// <summary>
         /// 自定义消息通知
         /// </summary>
-        public void OnCustomMessage(CustomMessageNotification info);
+        public void OnCustomMessageReceived(CustomMessageNotification info);
 
         /// <summary>
         /// 玩家被踢出房间通知
