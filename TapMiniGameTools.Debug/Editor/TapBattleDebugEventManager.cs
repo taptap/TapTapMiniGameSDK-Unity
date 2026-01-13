@@ -89,16 +89,16 @@ namespace TapServer
             switch (eventType)
             {
                 // 房间事件
-                case "OnPlayerEnterRoom":
+                case "OnPlayerEntered":
                     var enterInfo = JsonMapper.ToObject<EnterRoomNotification>(eventDataJson);
-                    registeredEventHandler.OnPlayerEnterRoom(enterInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] 📥 OnPlayerEnterRoom");
+                    registeredEventHandler.OnPlayerEntered(enterInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] 📥 OnPlayerEntered");
                     break;
 
-                case "OnPlayerLeaveRoom":
+                case "OnPlayerLeft":
                     var leaveInfo = JsonMapper.ToObject<LeaveRoomNotification>(eventDataJson);
-                    registeredEventHandler.OnPlayerLeaveRoom(leaveInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] 📤 OnPlayerLeaveRoom");
+                    registeredEventHandler.OnPlayerLeft(leaveInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] 📤 OnPlayerLeft");
                     break;
 
                 case "OnPlayerKicked":
@@ -114,25 +114,25 @@ namespace TapServer
                     Debug.Log($"[TapBattleDebugEventManager] 📴 OnPlayerOffline");
                     break;
 
-                case "OnPlayerCustomStatusChange":
+                case "OnPlayerCustomStatusChanged":
                     var statusInfo = JsonMapper.ToObject<PlayerCustomStatusNotification>(eventDataJson);
-                    registeredEventHandler.OnPlayerCustomStatusChange(statusInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] ⚡ OnPlayerCustomStatusChange");
+                    registeredEventHandler.OnPlayerCustomStatusChanged(statusInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] ⚡ OnPlayerCustomStatusChanged");
                     break;
 
-                case "OnPlayerCustomPropertiesChange":
+                case "OnPlayerCustomPropertiesChanged":
                     // 直接从JsonData提取字段，避免LitJson的双重JSON解析bug
                     var propInfo = new PlayerCustomPropertiesNotification
                     {
                         playerId = eventData["playerId"]?.ToString(),
                         properties = eventData["properties"]?.ToString()  // 保持JSON字符串格式
                     };
-                    registeredEventHandler.OnPlayerCustomPropertiesChange(propInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] 🔧 OnPlayerCustomPropertiesChange");
+                    registeredEventHandler.OnPlayerCustomPropertiesChanged(propInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] 🔧 OnPlayerCustomPropertiesChanged");
                     break;
 
                 // 房间属性事件
-                case "OnRoomPropertiesChange":
+                case "OnRoomPropertiesChanged":
                     // 直接从JsonData提取字段，避免LitJson的双重JSON解析bug
                     var roomInfo = new RoomPropertiesNotification
                     {
@@ -140,35 +140,35 @@ namespace TapServer
                         name = eventData["name"]?.ToString(),
                         customProperties = eventData["customProperties"]?.ToString()  // 保持JSON字符串格式
                     };
-                    registeredEventHandler.OnRoomPropertiesChange(roomInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] 🏠 OnRoomPropertiesChange");
+                    registeredEventHandler.OnRoomPropertiesChanged(roomInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] 🏠 OnRoomPropertiesChanged");
                     break;
 
                 // 帧同步事件
-                case "OnFrameSyncStart":
+                case "OnFrameSyncStarted":
                     var battleStartInfo = JsonMapper.ToObject<FrameSyncStartInfo>(eventDataJson);
-                    registeredEventHandler.OnFrameSyncStart(battleStartInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] ▶️ OnFrameSyncStart: seed={battleStartInfo.seed}");
+                    registeredEventHandler.OnFrameSyncStarted(battleStartInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] ▶️ OnFrameSyncStarted: seed={battleStartInfo.seed}");
                     break;
 
-                case "OnFrameInput":
-                    // frameData是字符串类型，直接提取
-                    string frameData = eventData.ToString();
-                    registeredEventHandler.OnFrameInput(frameData);
+                case "OnFrameReceived":
+                    // 解析帧数据
+                    var frameData = JsonMapper.ToObject<FrameData>(eventDataJson);
+                    registeredEventHandler.OnFrameReceived(frameData);
                     // 帧数据频繁，不输出日志
                     break;
 
-                case "OnFrameSyncStop":
+                case "OnFrameSyncStopped":
                         var battleStopInfo = JsonMapper.ToObject<FrameSyncStopInfo>(eventDataJson);
-                        registeredEventHandler.OnFrameSyncStop(battleStopInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] ⏹️ OnFrameSyncStop");
+                        registeredEventHandler.OnFrameSyncStopped(battleStopInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] ⏹️ OnFrameSyncStopped");
                     break;
 
                 // 消息事件
-                case "OnCustomMessage":
+                case "OnCustomMessageReceived":
                     var customMsgInfo = JsonMapper.ToObject<CustomMessageNotification>(eventDataJson);
-                    registeredEventHandler.OnCustomMessage(customMsgInfo);
-                    Debug.Log($"[TapBattleDebugEventManager] 💬 OnCustomMessage");
+                    registeredEventHandler.OnCustomMessageReceived(customMsgInfo);
+                    Debug.Log($"[TapBattleDebugEventManager] 💬 OnCustomMessageReceived");
                     break;
 
                 // 错误事件
