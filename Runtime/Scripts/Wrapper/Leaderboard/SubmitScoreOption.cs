@@ -5,25 +5,31 @@ using UnityEngine.Scripting;
 
 namespace TapTapMiniGame
 {
+    [Preserve]
     public class SubmitScoreOption
     {
+        [Preserve]
         public List<ScoreItem> scores;
-        
+
+        [Preserve]
         public LeaderboardCallback<SubmitScoresResponse> callback;
-        
+
     }
-    
+
+    [Preserve]
     public class ScoreItem
     {
 
         /// <summary>
         /// 排行榜ID
         /// </summary>
+        [Preserve]
         public string leaderboardId;
 
         /// <summary>
         /// 分数
         /// </summary>
+        [Preserve]
         public long score;
     }
 

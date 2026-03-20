@@ -2652,28 +2652,57 @@ namespace TapTapMiniGame
         /// <summary>
         /// 创建随机数生成器
         /// </summary>
-        public static void NewRandomNumberGenerator(int seed)
+        /// <param name="seed">随机数种子</param>
+        /// <returns>随机数生成器实例</returns>
+        public static RandomNumberGenerator NewRandomNumberGenerator(int seed)
         {
-            TapDebugBridge.Battle_NewRandomNumberGenerator(seed);
+            var debugRng = TapDebugBridge.Battle_NewRandomNumberGenerator(seed);
+            return new RandomNumberGenerator(debugRng);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 随机数生成器类（调试环境专用）
+    /// 包装DebugRandomNumberGenerator以提供与SDK一致的接口
+    /// </summary>
+    public class RandomNumberGenerator
+    {
+        private readonly TapDebugBridge.DebugRandomNumberGenerator debugRng;
+        private bool isFreed = false;
+
+        internal RandomNumberGenerator(TapDebugBridge.DebugRandomNumberGenerator debugRng)
+        {
+            this.debugRng = debugRng;
         }
 
         /// <summary>
         /// 生成随机整数
         /// </summary>
-        public static int RandomInt()
+        public int RandomInt()
         {
-            return TapDebugBridge.Battle_RandomInt();
+            if (isFreed)
+            {
+                throw new System.InvalidOperationException("RandomNumberGenerator has been freed");
+            }
+
+            return debugRng.RandomInt();
         }
 
         /// <summary>
         /// 释放随机数生成器
         /// </summary>
-        public static void FreeRandomNumberGenerator()
+        public void Free()
         {
-            TapDebugBridge.Battle_FreeRandomNumberGenerator();
-        }
+            if (isFreed)
+            {
+                return; // 已经释放过了，避免重复释放
+            }
 
-        #endregion
+            debugRng.Free();
+            isFreed = true;
+        }
     }
 }
 #endif

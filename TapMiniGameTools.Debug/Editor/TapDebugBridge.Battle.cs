@@ -459,46 +459,81 @@ public partial class TapDebugBridge
     #region 多人联机 - 随机数工具
 
     /// <summary>
-    /// 创建随机数生成器桥接
-    /// 注意: 这个API没有回调，需要特殊处理
+    /// 调试环境下的随机数生成器代理类
+    /// 通过网络桥接到真机端执行，使用方式与真实SDK完全一致
     /// </summary>
-    public static void Battle_NewRandomNumberGenerator(int seed)
+    public class DebugRandomNumberGenerator
     {
-        string messageData = JsonMapper.ToJson(new {
-            type = "Battle_NewRandomNumberGenerator",
-            param = new { seed = seed }
-        });
+        private readonly int instanceId;
+        private static int _nextInstanceId = 0;
 
-        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+        internal DebugRandomNumberGenerator(int seed)
         {
-            Debug.Log($"[TapDebugBridge] Battle_NewRandomNumberGenerator执行完成");
-        });
+            this.instanceId = _nextInstanceId++;
+
+            // 发送创建命令到真机
+            string messageData = JsonMapper.ToJson(new {
+                type = "Battle_NewRandomNumberGenerator",
+                param = new { instanceId = this.instanceId, seed = seed }
+            });
+
+            NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+            {
+                Debug.Log($"[TapDebugBridge] 随机数生成器已创建 (ID:{instanceId}, 种子:{seed})");
+            });
+        }
+
+        /// <summary>
+        /// 生成随机整数
+        /// 注意：Editor环境下无法同步返回真机的随机值，建议在真机测试
+        /// </summary>
+        public int RandomInt()
+        {
+            Debug.LogWarning("[TapDebugBridge] RandomInt在Editor环境下暂不支持同步返回，请在真机环境测试");
+
+            // 发送消息到真机（真机端会生成真实随机数）
+            string messageData = JsonMapper.ToJson(new {
+                type = "Battle_RandomInt",
+                param = new { instanceId = this.instanceId }
+            });
+
+            NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+            {
+                // 真机会返回真实的随机值，但Editor端无法同步获取
+                Debug.Log($"[TapDebugBridge] 真机生成随机数 (ID:{instanceId})");
+            });
+
+            // Editor环境下返回0占位
+            return 0;
+        }
+
+        /// <summary>
+        /// 释放随机数生成器资源
+        /// </summary>
+        public void Free()
+        {
+            string messageData = JsonMapper.ToJson(new {
+                type = "Battle_FreeRandomNumberGenerator",
+                param = new { instanceId = this.instanceId }
+            });
+
+            NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
+            {
+                Debug.Log($"[TapDebugBridge] 随机数生成器已释放 (ID:{instanceId})");
+            });
+        }
     }
 
     /// <summary>
-    /// 生成随机整数桥接
-    /// 注意: 这个API是同步返回值，需要特殊处理
-    /// 当前实现为异步模式，返回0作为占位
+    /// 创建随机数生成器
+    /// 返回代理实例，使用方式与真实SDK完全一致：
+    /// var rng = TapDebugBridge.Battle_NewRandomNumberGenerator(seed);
+    /// int value = rng.RandomInt();
+    /// rng.Free();
     /// </summary>
-    public static int Battle_RandomInt()
+    public static DebugRandomNumberGenerator Battle_NewRandomNumberGenerator(int seed)
     {
-        Debug.LogWarning("[TapDebugBridge] Battle_RandomInt在Editor环境下暂不支持同步返回，请在真机环境测试");
-        // TODO: 考虑使用TapSyncCache机制支持同步返回
-        return 0;
-    }
-
-    /// <summary>
-    /// 释放随机数生成器桥接
-    /// 注意: 这个API没有回调，需要特殊处理
-    /// </summary>
-    public static void Battle_FreeRandomNumberGenerator()
-    {
-        string messageData = JsonMapper.ToJson(new { type = "Battle_FreeRandomNumberGenerator" });
-
-        NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
-        {
-            Debug.Log($"[TapDebugBridge] Battle_FreeRandomNumberGenerator执行完成");
-        });
+        return new DebugRandomNumberGenerator(seed);
     }
 
     #endregion

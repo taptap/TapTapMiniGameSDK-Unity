@@ -33,7 +33,7 @@ namespace TapTapMiniGame.Editor
         /// <summary>
         /// 小游戏包的CDN下载地址
         /// </summary>
-        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/2025-12-12/7508b9349b0c548c8b8e8a9e30776f16.zip";
+        private const string DOWNLOAD_URL = "https://app-res.tapimg.com/file/2026-02-04/5b3b4abeb4baa4723749f4ea08df9b08.zip";
 
         /// <summary>
         /// 本地调试文件存储目录
@@ -266,13 +266,39 @@ namespace TapTapMiniGame.Editor
                 
                 if (gameInfo != null && !string.IsNullOrEmpty(gameInfo.appId))
                 {
-                    string profileName = userBuildProfiles.Count > 0 && selectedProfileIndex < userBuildProfiles.Count ? 
+                    string profileName = userBuildProfiles.Count > 0 && selectedProfileIndex < userBuildProfiles.Count ?
                         userBuildProfiles[selectedProfileIndex].profileName : "Unknown";
                     Debug.Log($"User game info loaded from [{profileName}]: appId={gameInfo.appId}, productName={gameInfo.productName}");
                 }
                 else
                 {
-                    Debug.LogError($"Failed to load game info from: {currentUserDstPath}");
+                    // game.json 不存在，尝试保底机制
+                    Debug.Log($"game.json not found at: {currentUserDstPath}");
+
+                    // 保底机制：当 game.json 不存在时，尝试从构建配置中读取
+                    if (userBuildProfiles.Count > 0 && selectedProfileIndex < userBuildProfiles.Count)
+                    {
+                        BuildProfileInfo currentProfile = userBuildProfiles[selectedProfileIndex];
+                        Debug.Log($"[Fallback] Attempting to load appId from config: {currentProfile.profileName}");
+
+                        gameInfo = TapMiniGameConfigHelper.LoadGameInfoFallback(currentProfile);
+
+                        if (gameInfo != null && !string.IsNullOrEmpty(gameInfo.appId))
+                        {
+                            Debug.Log($"[Fallback] Successfully loaded game info from config: appId={gameInfo.appId}, productName={gameInfo.productName}");
+                            Debug.Log($"[Fallback] You can now use debug tools without building the game first!");
+                        }
+                        else
+                        {
+                            // 保底机制也失败了，说明是完全没配置的空项目，不报错，只是提示
+                            Debug.Log($"[TapMiniGame] 调试工具需要小游戏 appId 才能使用");
+                            Debug.Log($"[TapMiniGame] 请在 Build Profile 或 Assets/TapTapMiniGame/Editor/MiniGameConfig.asset 中配置 appId");
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("[TapMiniGame] No build profiles available. Please create a build configuration first.");
+                    }
                 }
             }
             catch (Exception e)
@@ -365,7 +391,7 @@ namespace TapTapMiniGame.Editor
                 }
                 else
                 {
-                    Debug.LogError("无法启动服务器：未找到有效的 gameInfo。请先构建你的游戏或刷新配置。");
+                    Debug.Log("无法启动服务器：未找到有效的 gameInfo。请先构建你的游戏或刷新配置。");
                 }
             }
         }

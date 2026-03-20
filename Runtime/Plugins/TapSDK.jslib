@@ -754,21 +754,30 @@ var TapBattleLibrary = {
     
     // === Random Number Generator Interface ===
     
-    Tap_Battle_NewRandomNumberGenerator: function (seed) {
+    Tap_Battle_NewRandomNumberGenerator: function (instanceId, seed) {
         try {
-            window._randomGenerator = window._tapOnlineBattleManager.newRandomNumberGenerator(seed);
+            if (!window._tapRandomGenerators) {
+                window._tapRandomGenerators = {};
+            }
+            const generator = window._tapOnlineBattleManager.newRandomNumberGenerator(seed);
+            window._tapRandomGenerators[instanceId] = generator;
+            console.log("[TapBattle] Created RandomNumberGenerator with instanceId:", instanceId, "seed:", seed);
         } catch (error) {
             console.error("[TapBattle] Error in Tap_Battle_NewRandomNumberGenerator:", error.message || "Unknown error");
-            return null;
         }
     },
     
-    Tap_Battle_RandomInt: function () {
+    Tap_Battle_RandomInt: function (instanceId) {
         try {
-            if (window._randomGenerator && window._randomGenerator) {
-                return window._randomGenerator.randomInt();
+            if (!window._tapRandomGenerators) {
+                console.error("[TapBattle] No RandomNumberGenerator instances available");
+                return 0;
+            }
+            const generator = window._tapRandomGenerators[instanceId];
+            if (generator && generator.randomInt) {
+                return generator.randomInt();
             } else {
-                console.error("[TapBattle] No current RandomNumberGenerator instance available");
+                console.error("[TapBattle] RandomNumberGenerator with instanceId", instanceId, "not found");
                 return 0;
             }
         } catch (error) {
@@ -777,10 +786,22 @@ var TapBattleLibrary = {
         }
     },
     
-    Tap_Battle_FreeRandomNumberGenerator: function () {
+    Tap_Battle_FreeRandomNumberGenerator: function (instanceId) {
         try {
-            window._randomGenerator.free();
-            window._randomGenerator = null;
+            if (!window._tapRandomGenerators) {
+                console.warn("[TapBattle] No RandomNumberGenerator instances to free");
+                return;
+            }
+            const generator = window._tapRandomGenerators[instanceId];
+            if (generator) {
+                if (generator.free) {
+                    generator.free();
+                }
+                delete window._tapRandomGenerators[instanceId];
+                console.log("[TapBattle] Freed RandomNumberGenerator with instanceId:", instanceId);
+            } else {
+                console.warn("[TapBattle] RandomNumberGenerator with instanceId", instanceId, "not found");
+            }
         } catch (error) {
             console.error("[TapBattle] Error in Tap_Battle_FreeRandomNumberGenerator:", error.message || "Unknown error");
         }
@@ -804,90 +825,116 @@ var TapBattleLibrary = {
                         console.log("[TapBattle] onDisconnected:", JSON.stringify(errorInfo, null, 2));
                         _Tap_JSCallback(callbackIds.onDisconnected, "success", errorInfo);
                     };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onDisconnected'");
                 }
-                
+
                 if (callbackIds.onBattleServiceError) {
                     listenerConfig.onBattleServiceError = (errorInfo) => {
                         console.log("[TapBattle] onBattleServiceError:", JSON.stringify(errorInfo, null, 2));
                         _Tap_JSCallback(callbackIds.onBattleServiceError, "success", errorInfo);
                     };
-                }
-                
-                if (callbackIds.onRoomPropertiesChange) {
-                    listenerConfig.onRoomPropertiesChange = (info) => {
-                        console.log("[TapBattle] onRoomPropertiesChange:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onRoomPropertiesChange, "success", info);
-                    };
-                }
-                
-                if (callbackIds.onPlayerCustomPropertiesChange) {
-                    listenerConfig.onPlayerCustomPropertiesChange = (info) => {
-                        console.log("[TapBattle] onPlayerCustomPropertiesChange:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onPlayerCustomPropertiesChange, "success", info);
-                    };
-                }
-                
-                if (callbackIds.onPlayerCustomStatusChange) {
-                    listenerConfig.onPlayerCustomStatusChange = (info) => {
-                        console.log("[TapBattle] onPlayerCustomStatusChange:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onPlayerCustomStatusChange, "success", info);
-                    };
-                }
-                
-                if (callbackIds.onFrameSyncStop) {
-                    listenerConfig.onFrameSyncStop = (info) => {
-                        console.log("[TapBattle] onFrameSyncStop:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onFrameSyncStop, "success", info);
-                    };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onBattleServiceError'");
                 }
 
-                if (callbackIds.onFrame) {
-                    listenerConfig.onFrame = (info) => {
-                        console.log("[TapBattle] onFrame:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onFrame, "success", info);
+                if (callbackIds.onRoomPropertiesChanged) {
+                    listenerConfig.onRoomPropertiesChanged = (info) => {
+                        console.log("[TapBattle] onRoomPropertiesChanged:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onRoomPropertiesChanged, "success", info);
                     };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onRoomPropertiesChanged'");
                 }
 
-                if (callbackIds.onFrameSyncStart) {
-                    listenerConfig.onFrameSyncStart = (info) => {
-                        console.log("[TapBattle] onFrameSyncStart:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onFrameSyncStart, "success", info);
+                if (callbackIds.onPlayerCustomPropertiesChanged) {
+                    listenerConfig.onPlayerCustomPropertiesChanged = (info) => {
+                        console.log("[TapBattle] onPlayerCustomPropertiesChanged:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onPlayerCustomPropertiesChanged, "success", info);
                     };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onPlayerCustomPropertiesChanged'");
                 }
-                
-                if (callbackIds.playerOffline) {
-                    listenerConfig.playerOffline = (info) => {
-                        console.log("[TapBattle] playerOffline:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.playerOffline, "success", info);
+
+                if (callbackIds.onPlayerCustomStatusChanged) {
+                    listenerConfig.onPlayerCustomStatusChanged = (info) => {
+                        console.log("[TapBattle] onPlayerCustomStatusChanged:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onPlayerCustomStatusChanged, "success", info);
                     };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onPlayerCustomStatusChanged'");
                 }
-                
-                if (callbackIds.playerLeaveRoom) {
-                    listenerConfig.playerLeaveRoom = (info) => {
-                        console.log("[TapBattle] playerLeaveRoom:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.playerLeaveRoom, "success", info);
+
+                if (callbackIds.onFrameSyncStopped) {
+                    listenerConfig.onFrameSyncStopped = (info) => {
+                        console.log("[TapBattle] onFrameSyncStopped:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onFrameSyncStopped, "success", info);
                     };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onFrameSyncStopped'");
                 }
-                
-                if (callbackIds.playerEnterRoom) {
-                    listenerConfig.playerEnterRoom = (info) => {
-                        console.log("[TapBattle] playerEnterRoom:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.playerEnterRoom, "success", info);
+
+                if (callbackIds.onFrameReceived) {
+                    listenerConfig.onFrameReceived = (info) => {
+                        console.log("[TapBattle] onFrameReceived:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onFrameReceived, "success", info);
                     };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onFrameReceived'");
                 }
-                
-                if (callbackIds.onCustomMessage) {
-                    listenerConfig.onCustomMessage = (info) => {
-                        console.log("[TapBattle] onCustomMessage:", JSON.stringify(info, null, 2));
-                        _Tap_JSCallback(callbackIds.onCustomMessage, "success", info);
+
+                if (callbackIds.onFrameSyncStarted) {
+                    listenerConfig.onFrameSyncStarted = (info) => {
+                        console.log("[TapBattle] onFrameSyncStarted:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onFrameSyncStarted, "success", info);
                     };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onFrameSyncStarted'");
                 }
-                
+
+                if (callbackIds.onPlayerOffline) {
+                    listenerConfig.onPlayerOffline = (info) => {
+                        console.log("[TapBattle] onPlayerOffline:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onPlayerOffline, "success", info);
+                    };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onPlayerOffline'");
+                }
+
+                if (callbackIds.onPlayerLeft) {
+                    listenerConfig.onPlayerLeft = (info) => {
+                        console.log("[TapBattle] onPlayerLeft:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onPlayerLeft, "success", info);
+                    };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onPlayerLeft'");
+                }
+
+                if (callbackIds.onPlayerEntered) {
+                    listenerConfig.onPlayerEntered = (info) => {
+                        console.log("[TapBattle] onPlayerEntered:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onPlayerEntered, "success", info);
+                    };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onPlayerEntered'");
+                }
+
+                if (callbackIds.onCustomMessageReceived) {
+                    listenerConfig.onCustomMessageReceived = (info) => {
+                        console.log("[TapBattle] onCustomMessageReceived:", JSON.stringify(info, null, 2));
+                        _Tap_JSCallback(callbackIds.onCustomMessageReceived, "success", info);
+                    };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onCustomMessageReceived'");
+                }
+
                 if (callbackIds.onPlayerKicked) {
                     listenerConfig.onPlayerKicked = (info) => {
                         console.log("[TapBattle] onPlayerKicked:", JSON.stringify(info, null, 2));
                         _Tap_JSCallback(callbackIds.onPlayerKicked, "success", info);
                     };
+                } else {
+                    console.error("[TapBattle] RegisterListener Error: Missing required callback property 'onPlayerKicked'");
                 }
                 
                 // Save listenerConfig for unregisterListener

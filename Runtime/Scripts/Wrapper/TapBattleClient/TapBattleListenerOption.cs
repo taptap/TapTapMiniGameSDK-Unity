@@ -4,37 +4,15 @@ using UnityEngine.Scripting;
 
 namespace TapTapMiniGame
 {
-// === TapOnlineBattle事件监听器数据结构 ===
-
-/// <summary>
-/// TapOnlineBattle事件监听器选项类
-/// 用于一次性传入多个事件回调函数，每个回调对应一个独立的callbackId
-/// </summary>
-[Preserve]
-public class TapOnlineBattleListenerOption
-{
-    public Action<DisconnectedInfo> onDisconnected;
-    public Action<BattleServiceErrorInfo> onBattleServiceError;
-    public Action<RoomPropertiesNotification> onRoomPropertiesChange;
-    public Action<PlayerCustomPropertiesNotification> onPlayerCustomPropertiesChange;
-    public Action<PlayerCustomStatusNotification> onPlayerCustomStatusChange;
-    public Action<FrameSyncStopInfo> onBattleStop;
-    public Action<string> onBattleFrame;
-    public Action<FrameSyncStartInfo> onBattleStart;
-    public Action<PlayerOfflineNotification> playerOffline;
-    public Action<LeaveRoomNotification> playerLeaveRoom;
-    public Action<EnterRoomNotification> playerEnterRoom;
-    public Action<CustomMessageNotification> onCustomMessage;
-    public Action<PlayerKickedInfo> onPlayerKicked;
-}
-
 /// <summary>
 /// 连接断开信息
 /// </summary>
 [Preserve]
 public class DisconnectedInfo
 {
+    [Preserve]
     public string reason;
+    [Preserve]
     public int code;
     
     [Preserve]
@@ -47,7 +25,9 @@ public class DisconnectedInfo
 [Preserve]
 public class BattleServiceErrorInfo
 {
+    [Preserve]
     public string errorMessage;
+    [Preserve]
     public int errorCode;  // 错误码
     
     [Preserve]
@@ -60,8 +40,11 @@ public class BattleServiceErrorInfo
 [Preserve]
 public class FrameSyncStopInfo
 {
+    [Preserve]
     public string roomId;   // 房间ID
-    public int battleId;    // 对战ID
+    [Preserve]
+    public int frameSyncId;    // 帧同步ID
+    [Preserve]
     public int reason;      // 结束原因: 0=房主主动结束, 1=超时结束(30分钟)
 
     [Preserve]
@@ -78,11 +61,13 @@ public class BattleFrameInfo<T>
     /// <summary>
     /// 帧ID
     /// </summary>
+    [Preserve]
     public int id;
     
     /// <summary>
     /// 玩家输入数据列表
     /// </summary>
+    [Preserve]
     public List<T> inputs;
     
     [Preserve]
@@ -95,10 +80,14 @@ public class BattleFrameInfo<T>
 [Preserve]
 public class FrameSyncStartInfo
 {
+    [Preserve]
     public RoomInfo roomInfo;   // 完整的房间信息(包含players等)
-    public int battleId;        // 对战ID,房间内唯一
+    [Preserve]
+    public int frameSyncId;        // 帧同步ID,房间内唯一
+    [Preserve]
     public int seed;            // 随机数种子,用于NewRandomNumberGenerator
-    public string serverTms;    // 对战开始服务器时间(毫秒时间戳字符串)
+    [Preserve]
+    public string serverTime;    // 帧同步开始服务器时间(毫秒时间戳字符串)
 
     [Preserve]
     public FrameSyncStartInfo() { }
@@ -110,10 +99,44 @@ public class FrameSyncStartInfo
 [Preserve]
 public class PlayerKickedInfo
 {
+    [Preserve]
     public string roomId;    // 被踢玩家所属房间ID
+    [Preserve]
     public string playerId;  // 被踢玩家ID
     
     [Preserve]
     public PlayerKickedInfo() { }
+}
+
+/// <summary>
+/// 帧同步数据
+/// </summary>
+[Preserve]
+public class FrameData
+{
+    [Preserve]
+    public int id;                      // 帧序号
+    [Preserve]
+    public PlayerInputInfo[] inputs;    // 本帧所有玩家的输入
+    
+    [Preserve]
+    public FrameData() { }
+}
+
+/// <summary>
+/// 玩家输入信息
+/// </summary>
+[Preserve]
+public class PlayerInputInfo
+{
+    [Preserve]
+    public string playerId;     // 玩家ID
+    [Preserve]
+    public string data;         // 操作数据（JSON字符串）
+    [Preserve]
+    public string serverTime;   // 服务器时间戳
+    
+    [Preserve]
+    public PlayerInputInfo() { }
 }
 }

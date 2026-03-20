@@ -110,6 +110,16 @@ namespace TapTapMiniGame
 #else
             TJExtEnvDef.SETDEF("PLATFORM_WEIXINMINIGAME", false);
 #endif
+#if TUANJIE_1_6_OR_NEWER
+            TJExtEnvDef.SETDEF("TUANJIE_1_6_OR_NEWER", true);
+#else
+            TJExtEnvDef.SETDEF("TUANJIE_1_6_OR_NEWER", false);
+#endif
+#if TUANJIE_1_8_OR_NEWER
+            TJExtEnvDef.SETDEF("TUANJIE_1_8_OR_NEWER", true);
+#else
+            TJExtEnvDef.SETDEF("TUANJIE_1_8_OR_NEWER", false);
+#endif
             RegisterController();
         }
         

@@ -47,7 +47,7 @@ namespace TapTapMiniGame.Editor
         // 调试开关状态
         private bool isDebugEnabled;
         private bool panelDebugEnabled = true;
-        private bool enableClientBuild = true;
+        private bool enableClientBuild = false;
         
         // 缓存的服务器信息
         private ServerInfo cachedServerInfo;
@@ -149,9 +149,17 @@ namespace TapTapMiniGame.Editor
             
             // 调试开关控制
             DrawDebugToggle();
-            
+
             EditorGUILayout.Space(10);
-            
+
+            // 检查是否已获取到 appId（通过 gameInfo 判断）
+            if (isDebugEnabled && (gameInfo == null || string.IsNullOrEmpty(gameInfo.appId)))
+            {
+                // 没有 appId，显示配置提示，不渲染调试工具UI
+                DrawNoAppIdMessage();
+                return;
+            }
+
             // 根据调试开关状态显示不同内容
             if (isDebugEnabled)
             {
@@ -301,6 +309,49 @@ namespace TapTapMiniGame.Editor
                 );
                 EditorGUILayout.Space(20);
             }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawNoAppIdMessage()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            EditorGUILayout.Space(20);
+
+            GUILayout.Label("未配置小游戏 AppId", warningStyle);
+
+            EditorGUILayout.Space(10);
+
+            EditorGUILayout.HelpBox(
+                "调试工具需要小游戏 AppId 才能正常工作。\n\n" +
+                "请按照以下步骤配置：\n\n" +
+                "TapTap小游戏/构建 -> 在打开的界面中填写appid",
+                MessageType.Warning
+            );
+
+            EditorGUILayout.Space(10);
+
+            // 刷新按钮
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("刷新配置", GUILayout.Height(30), GUILayout.Width(120)))
+            {
+                LoadUserBuildProfiles();
+                Repaint();
+            }
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space(20);
+
+            // 额外提示信息
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("💡 提示", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("配置完成后，点击上方的 '刷新配置' 按钮即可使用调试工具。", EditorStyles.wordWrappedLabel);
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.Space(20);
+
             EditorGUILayout.EndVertical();
         }
 

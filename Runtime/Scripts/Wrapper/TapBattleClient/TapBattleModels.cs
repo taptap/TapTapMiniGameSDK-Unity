@@ -8,12 +8,12 @@ namespace TapTapMiniGame
     /// 登录响应 - Result类型
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class SignInResponse
     {
         /// <summary>
         /// 玩家ID
         /// </summary>
+        [Preserve]
         public string playerId;
     }
 
@@ -21,22 +21,24 @@ namespace TapTapMiniGame
     /// 初始化响应 - 对应Native TapSdkOnlineBattleInitialize返回值
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class InitializeResponse
     {
         /// <summary>
         /// 初始化结果码 (0=成功, -1=失败)
         /// </summary>
+        [Preserve]
         public int resultCode;
         
         /// <summary>
         /// 消息
         /// </summary>
+        [Preserve]
         public string message;
         
         /// <summary>
         /// SDK版本信息
         /// </summary>
+        [Preserve]
         public string version;
     }
 
@@ -44,7 +46,6 @@ namespace TapTapMiniGame
     /// 登录响应
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class SignInValidationResponse
     {
         /// <summary>
@@ -53,11 +54,13 @@ namespace TapTapMiniGame
         /// -1 = 失败
         /// -2 = 未初始化
         /// </summary>
+        [Preserve]
         public int resultCode;
 
         /// <summary>
         /// 消息
         /// </summary>
+        [Preserve]
         public string message;
     }
 
@@ -65,22 +68,24 @@ namespace TapTapMiniGame
     /// 版本信息响应 - 对应Native TapSdkOnlineBattleVersion()同步返回
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class VersionResponse
     {
         /// <summary>
         /// SDK版本号（如：1.2.5）
         /// </summary>
+        [Preserve]
         public string version;
         
         /// <summary>
         /// Git提交版本（可选）
         /// </summary>
+        [Preserve]
         public string gitCommit;
         
         /// <summary>
         /// 消息
         /// </summary>
+        [Preserve]
         public string message;
     }
 
@@ -88,17 +93,18 @@ namespace TapTapMiniGame
     /// 登出响应
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class SignOutValidationResponse
     {
         /// <summary>
         /// 结果码 (0=成功, -1=失败, -2=未初始化)
         /// </summary>
+        [Preserve]
         public int resultCode;
 
         /// <summary>
         /// 消息
         /// </summary>
+        [Preserve]
         public string message;
     }
 
@@ -106,17 +112,18 @@ namespace TapTapMiniGame
     /// 房间操作响应
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class RoomValidationResponse
     {
         /// <summary>
         /// 结果码 (0=成功, -1=失败, -2=未初始化)
         /// </summary>
+        [Preserve]
         public int resultCode;
 
         /// <summary>
         /// 消息
         /// </summary>
+        [Preserve]
         public string message;
     }
 
@@ -124,17 +131,18 @@ namespace TapTapMiniGame
     /// 更新操作响应
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class UpdateValidationResponse
     {
         /// <summary>
         /// 结果码 (0=成功, -1=失败, -2=未初始化)
         /// </summary>
+        [Preserve]
         public int resultCode;
 
         /// <summary>
         /// 消息
         /// </summary>
+        [Preserve]
         public string message;
     }
 
@@ -142,59 +150,62 @@ namespace TapTapMiniGame
     /// 对战操作响应
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class BattleValidationResponse
     {
         /// <summary>
         /// 结果码 (0=成功, -1=失败, -2=未初始化)
         /// </summary>
+        [Preserve]
         public int resultCode;
 
         /// <summary>
         /// 消息
         /// </summary>
+        [Preserve]
         public string message;
     }
 
     // === 房间管理相关结构 ===
 
     /// <summary>
-    /// 创建房间请求 - 对齐JS层数据结构
+    /// 创建房间配置 - 对齐JS层数据结构
     /// JS层格式: { roomCfg: {...}, playerCfg: {...} }
     /// </summary>
     [Preserve]
-    [System.Serializable]
-    public class CreateRoomRequest
+    public class CreateRoomConfig
     {
         /// <summary>
         /// 房间配置
         /// JS层字段名: roomCfg
         /// </summary>
+        [Preserve]
         public RoomConfig roomCfg;
         
         /// <summary>
         /// 玩家配置（可选）
         /// JS层字段名: playerCfg
         /// </summary>
+        [Preserve]
         public PlayerConfig playerCfg;
     }
 
     /// <summary>
-    /// 匹配房间请求 - 对齐JS层数据结构
+    /// 匹配房间配置 - 对齐JS层数据结构
     /// JS层格式: { roomCfg: {...}, playerCfg: {...} }
     /// </summary>
     [Preserve]
-    [System.Serializable]
-    public class MatchRoomRequest
+    public class MatchRoomConfig
     {
         /// <summary>
         /// 房间配置
         /// </summary>
+        [Preserve]
         public RoomConfig roomCfg;
         
         /// <summary>
         /// 玩家配置（可选）
         /// </summary>
+        [Preserve]
         public PlayerConfig playerCfg;
     }
 
@@ -203,27 +214,30 @@ namespace TapTapMiniGame
     /// 房间配置
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class RoomConfig
     {
         /// <summary>
         /// 房间最大人数
         /// </summary>
+        [Preserve]
         public int maxPlayerCount;
         
         /// <summary>
         /// 房间类型
         /// </summary>
+        [Preserve]
         public string type;
         
         /// <summary>
         /// 房间名称
         /// </summary>
+        [Preserve]
         public string name;
         
         /// <summary>
         /// 自定义房间属性（可选，最大2048字节）
         /// </summary>
+        [Preserve]
         public string customProperties;
         
         /// <summary>
@@ -236,17 +250,18 @@ namespace TapTapMiniGame
     /// 玩家配置
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class PlayerConfig
     {
         /// <summary>
         /// 自定义玩家状态（可选）
         /// </summary>
+        [Preserve]
         public int customStatus;
         
         /// <summary>
         /// 自定义玩家属性（可选，最大2048字节）
         /// </summary>
+        [Preserve]
         public string customProperties;
     }
 
@@ -255,17 +270,18 @@ namespace TapTapMiniGame
     /// 创建房间成功响应 - 包含完整房间信息
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class CreateRoomSuccessResponse
     {
         /// <summary>
         /// 房间信息
         /// </summary>
+        [Preserve]
         public RoomInfo roomInfo;
         
         /// <summary>
         /// 错误消息 (成功时为 "createRoom:ok")
         /// </summary>
+        [Preserve]
         public string errMsg;
     }
     
@@ -273,32 +289,36 @@ namespace TapTapMiniGame
     /// 房间基础信息 - 用于房间列表等仅包含基本属性的场景
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class RoomBaseInfo
     {
         /// <summary>
         /// 创建时间 (时间戳)
         /// </summary>
+        [Preserve]
         public string createTime;
         
         /// <summary>
         /// 自定义房间属性 (JSON字符串)
         /// </summary>
+        [Preserve]
         public string customProperties;
         
         /// <summary>
         /// 房间ID
         /// </summary>
+        [Preserve]
         public string id;
         
         /// <summary>
         /// 房间最大人数
         /// </summary>
+        [Preserve]
         public int maxPlayerCount;
         
         /// <summary>
         /// 房间名称
         /// </summary>
+        [Preserve]
         public string name;
     }
     
@@ -307,22 +327,24 @@ namespace TapTapMiniGame
     /// 用于创建房间、加入房间等需要完整信息的场景
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class RoomInfo : RoomBaseInfo
     {
         /// <summary>
         /// 房主ID
         /// </summary>
+        [Preserve]
         public string ownerId;
         
         /// <summary>
         /// 房间内玩家列表
         /// </summary>
+        [Preserve]
         public PlayerInfo[] players;
         
         /// <summary>
         /// 房间类型
         /// </summary>
+        [Preserve]
         public string type;
     }
     
@@ -331,12 +353,12 @@ namespace TapTapMiniGame
     /// 用于获取房间列表API返回，包含实时人数但不包含详细玩家列表
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class RoomListInfo : RoomBaseInfo
     {
         /// <summary>
         /// 房间当前人数
         /// </summary>
+        [Preserve]
         public int playerCount;
     }
     
@@ -344,71 +366,50 @@ namespace TapTapMiniGame
     /// 玩家信息
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class PlayerInfo
     {
         /// <summary>
         /// 玩家ID
         /// </summary>
+        [Preserve]
         public string id;
 
         /// <summary>
         /// 玩家状态: 0=离线, 1=在线
         /// </summary>
+        [Preserve]
         public int status;
 
         /// <summary>
         /// 自定义玩家状态(可选)
         /// </summary>
+        [Preserve]
         public int customStatus;
 
         /// <summary>
         /// 自定义玩家属性(可选,JSON字符串,最大2048字节)
         /// </summary>
+        [Preserve]
         public string customProperties;
-    }
-
-    /// <summary>
-    /// 创建房间响应 - 对齐Native CreateRoomResponse (保留原有结构用于兼容)
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class CreateRoomResponse
-    {
-        public int errorCode;
-        public string message;
-        public string roomId;
     }
 
     /// <summary>
     /// 匹配房间成功响应 - 包含完整房间信息
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class MatchRoomSuccessResponse
     {
         /// <summary>
         /// 房间信息
         /// </summary>
+        [Preserve]
         public RoomInfo roomInfo;
         
         /// <summary>
         /// 错误消息 (成功时为 "matchRoom:ok")
         /// </summary>
+        [Preserve]
         public string errMsg;
-    }
-
-    /// <summary>
-    /// 匹配房间响应 - 对齐Native MatchRoomResponse (保留原有结构用于兼容)
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class MatchRoomResponse
-    {
-        public int errorCode;
-        public string message;
-        public string roomId;
-        // 简化版，一期不包含teams详细信息
     }
 
     /// <summary>
@@ -416,22 +417,24 @@ namespace TapTapMiniGame
     /// JS层格式: { roomType: string, offset: number, limit: number }
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class GetRoomListRequest
     {
         /// <summary>
         /// 房间类型（可选，不填则拉取全部类型的房间）
         /// </summary>
+        [Preserve]
         public string roomType;
 
         /// <summary>
         /// 偏移量（可选，默认0，第一次请求时为0）
         /// </summary>
+        [Preserve]
         public int offset;
 
         /// <summary>
         /// 请求获取的房间数量（可选，默认20，最大100）
         /// </summary>
+        [Preserve]
         public int limit;
     }
 
@@ -439,17 +442,18 @@ namespace TapTapMiniGame
     /// 获取房间列表成功响应
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class GetRoomListSuccessResponse
     {
         /// <summary>
         /// 房间列表（包含基础信息和当前人数，不含ownerId、players、type）
         /// </summary>
+        [Preserve]
         public RoomListInfo[] rooms;
 
         /// <summary>
         /// 错误消息 (成功时为 "getRoomList:ok")
         /// </summary>
+        [Preserve]
         public string errMsg;
     }
 
@@ -458,17 +462,18 @@ namespace TapTapMiniGame
     /// JS层格式: { data: { roomId: string, playerCfg: {...} } }
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class JoinRoomRequest
     {
         /// <summary>
         /// 房间ID
         /// </summary>
+        [Preserve]
         public string roomId;
 
         /// <summary>
         /// 玩家配置（可选）
         /// </summary>
+        [Preserve]
         public PlayerConfig playerCfg;
     }
 
@@ -476,17 +481,18 @@ namespace TapTapMiniGame
     /// 加入房间成功响应
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class JoinRoomSuccessResponse
     {
         /// <summary>
         /// 房间信息
         /// </summary>
+        [Preserve]
         public RoomInfo roomInfo;
 
         /// <summary>
         /// 错误消息 (成功时为 "joinRoom:ok")
         /// </summary>
+        [Preserve]
         public string errMsg;
     }
 
@@ -496,10 +502,11 @@ namespace TapTapMiniGame
     /// 玩家进入房间通�� - 对齐Native EnterRoomNotification
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class EnterRoomNotification
     {
+        [Preserve]
         public string roomId;          // 房间ID
+        [Preserve]
         public PlayerInfo playerInfo;  // 进入房间的玩家完整信息
     }
 
@@ -507,11 +514,13 @@ namespace TapTapMiniGame
     /// 玩家离开房间通知 - 对齐Native LeaveRoomNotification
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class LeaveRoomNotification
     {
+        [Preserve]
         public string roomId;       // 房间ID
+        [Preserve]
         public string roomOwnerId;  // 房主ID (如果离开的是房主,则为新房主ID)
+        [Preserve]
         public string playerId;     // 离开房间的玩家ID
     }
 
@@ -519,70 +528,26 @@ namespace TapTapMiniGame
     /// 玩家离线通知 - 对齐Native PlayerOfflineNotification
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class PlayerOfflineNotification
     {
+        [Preserve]
         public string roomId;       // 房间ID
+        [Preserve]
         public string roomOwnerId;  // 房主ID (如果离线的是房主,则为新房主ID)
+        [Preserve]
         public string playerId;     // 离线玩家ID
     }
-
-    /// <summary>
-    /// 对战开始通知 - 对齐Native BattleStartNotification
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class BattleStartNotification
-    {
-        public RoomInfo roomInfo;   // 完整的房间信息(包含players等)
-        public int battleId;        // 对战ID,房间内唯一
-        public int seed;            // 随机数种子,用于NewRandomNumberGenerator
-        public string serverTms;    // 对战开始服务器时间(毫秒时间戳字符串)
-    }
-
-    /// <summary>
-    /// 帧同步数据 - 对齐Native BattleFrameSynchronization
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class BattleFrameSynchronization
-    {
-        public int id;
-        public PlayerInput[] inputs;
-    }
-
-    /// <summary>
-    /// 玩家输入数据 - 对齐Native格式
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class PlayerInput
-    {
-        public string playerId;    // 玩家ID
-        public string data;        // 玩家操作数据(UTF-8字符串)
-        public string serverTms;   // 服务器收到操作的时间(毫秒时间戳字符串)
-    }
-
-    /// <summary>
-    /// 对战停止通知 - 对齐Native BattleStopNotification
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class BattleStopNotification
-    {
-        public string roomId;   // 房间ID
-        public int battleId;    // 对战ID
-        public int reason;      // 结束原因: 0=房主主动结束, 1=超时结束(30分钟)
-    }
+    
 
     /// <summary>
     /// 玩家自定义状态变更通知
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class PlayerCustomStatusNotification
     {
+        [Preserve]
         public string playerId;  // 更新了自定义状态的玩家ID
+        [Preserve]
         public int status;       // 新的自定义状态值
     }
 
@@ -590,10 +555,11 @@ namespace TapTapMiniGame
     /// 玩家自定义属性变更通知
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class PlayerCustomPropertiesNotification
     {
+        [Preserve]
         public string playerId;     // 更新了自定义属性的玩家ID
+        [Preserve]
         public string properties;   // 新的自定义属性值
     }
 
@@ -601,44 +567,25 @@ namespace TapTapMiniGame
     /// 房间属性变更通知
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class RoomPropertiesNotification
     {
+        [Preserve]
         public string id;                 // 房间ID
+        [Preserve]
         public string name;               // 房间名称
+        [Preserve]
         public string customProperties;   // 房间自定义属性
-    }
-
-    /// <summary>
-    /// 对战服务错误通知
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class BattleServiceErrorNotification
-    {
-        public string errorMessage;
-        public int errorCode;  // 错误码
-    }
-
-    /// <summary>
-    /// 玩家被踢出房间通知 - 对齐Native RoomPlayerKickedNotification
-    /// </summary>
-    [Preserve]
-    [System.Serializable]
-    public class RoomPlayerKickedNotification
-    {
-        public string roomId;    // 被踢玩家所属房间ID
-        public string playerId;  // 被踢玩家ID
     }
 
     /// <summary>
     /// 自定义消息通知 - 对齐Native CustomMessageNotification
     /// </summary>
     [Preserve]
-    [System.Serializable]
     public class CustomMessageNotification
     {
+        [Preserve]
         public string playerId;  // 消息发送者玩家ID
+        [Preserve]
         public string msg;       // 自定义消息内容(UTF-8字符串,最大2048字节)
     }
 }
