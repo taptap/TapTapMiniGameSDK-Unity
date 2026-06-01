@@ -69,6 +69,14 @@ namespace TapTapMiniGame
         {
             TapExtManagerHandler.Instance.LoadPlayerCenteredScores(option);
         }
+
+        /// <summary>
+        /// 发起道具直购支付请求。
+        /// </summary>
+        public static void RequestPaymentGameItem(RequestPaymentGameItemOption option)
+        {
+            TapExtManagerHandler.Instance.RequestPaymentGameItem(option);
+        }
     }
 
     public class TapAchievement {

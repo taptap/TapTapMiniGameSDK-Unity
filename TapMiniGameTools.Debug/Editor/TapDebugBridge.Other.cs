@@ -625,25 +625,25 @@ public partial class TapDebugBridge
 
     #region 支付
     /// <summary>
-    /// 请求Midas游戏道具支付桥接
+    /// 请求道具直购支付桥接
     /// </summary>
-    public static void RequestMidasPaymentGameItem(RequestMidasPaymentGameItemOption option)
+    public static void RequestPaymentGameItem(RequestPaymentGameItemOption option)
     {
         var serializableParam = TapSDKApiUtil.CreateSerializableObject(option);
-        string messageData = JsonMapper.ToJson(new { type = "RequestMidasPaymentGameItem", param = serializableParam });
+        string messageData = JsonMapper.ToJson(new { type = "RequestPaymentGameItem", param = serializableParam });
         NetworkServerModule.Instance.SendMessage(messageData, (clientId, response) =>
         {
-            Debug.Log($"[测试] 收到RequestMidasPaymentGameItem回复: {response.ToJson()}");
+            Debug.Log($"[测试] 收到RequestPaymentGameItem回复: {response.ToJson()}");
             switch (response.status)
             {
                 case "success":
-                    option.success?.Invoke(response.GetResult<GeneralCallbackResult>());
+                    option.success?.Invoke(response.GetResult<PaymentGameItemResult>());
                     break;
                 case "fail":
-                    option.fail?.Invoke(response.GetResult<MidasPaymentGameItemError>());
+                    option.fail?.Invoke(response.GetResult<PaymentGameItemResult>());
                     break;
                 case "complete":
-                    option.complete?.Invoke(response.GetResult<MidasPaymentGameItemError>());
+                    option.complete?.Invoke(response.GetResult<PaymentGameItemResult>());
                     break;
             }
         });
@@ -4806,5 +4806,5 @@ public partial class TapDebugBridge
 
 
     #endregion
-} 
-#endif 
+}
+#endif

@@ -1272,15 +1272,6 @@ namespace TapTapMiniGame
             TapSDKManagerHandler.Instance.OpenPage(option);
         }
 
-        /// <summary>
-        /// requestMidasPaymentGameItem(Object object)
-        /// 发起米大师支付
-        /// </summary>
-        public static void RequestMidasPaymentGameItem(RequestMidasPaymentGameItemOption option)
-        {
-            TapSDKManagerHandler.Instance.RequestMidasPaymentGameItem(option);
-        }
-
         public static void RequestSubscribeLiveActivity(RequestSubscribeLiveActivityOption option)
         {
             TapSDKManagerHandler.Instance.RequestSubscribeLiveActivity(option);
