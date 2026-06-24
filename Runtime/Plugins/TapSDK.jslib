@@ -183,20 +183,20 @@ const TapPaymentLibrary = {
             tap.requestPaymentGameItem(Object.assign(args || {}, {
                 success: function(res) {
                     _Tap_JSCallback(callbackIdStr, "success", {
-                        errCode: Number(res && res.errCode || 0),
-                        errMsg: res && res.errMsg || ""
+                        errCode: Number(res && res.errCode != null ? res.errCode : 0),
+                        errMsg: res && res.errMsg != null ? res.errMsg : ""
                     });
                 },
                 fail: function(res) {
                     _Tap_JSCallback(callbackIdStr, "fail", {
-                        errCode: Number(res && res.errCode || -1),
-                        errMsg: res && res.errMsg || "requestPaymentGameItem failed"
+                        errCode: Number(res && res.errCode != null ? res.errCode : -1),
+                        errMsg: res && res.errMsg != null ? res.errMsg : "requestPaymentGameItem failed"
                     });
                 },
                 complete: function(res) {
                     _Tap_JSCallback(callbackIdStr, "complete", {
-                        errCode: Number(res && res.errCode || 0),
-                        errMsg: res && res.errMsg || ""
+                        errCode: Number(res && res.errCode != null ? res.errCode : 0),
+                        errMsg: res && res.errMsg != null ? res.errMsg : ""
                     });
                 }
             }));
