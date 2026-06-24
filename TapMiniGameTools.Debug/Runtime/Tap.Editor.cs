@@ -476,12 +476,12 @@ namespace TapTapMiniGame
 
         #region 虚拟支付
         /// <summary>
-        /// requestMidasPaymentGameItem(Object object)
-        /// 发起米大师支付
+        /// requestPaymentGameItem(Object object)
+        /// 发起道具直购支付请求。
         /// </summary>
-        public static void RequestMidasPaymentGameItem(RequestMidasPaymentGameItemOption option)
+        public static void RequestPaymentGameItem(RequestPaymentGameItemOption option)
         {
-            TapDebugBridge.RequestMidasPaymentGameItem(option);
+            TapDebugBridge.RequestPaymentGameItem(option);
         }
         #endregion
 

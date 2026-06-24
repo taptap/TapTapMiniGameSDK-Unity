@@ -175,6 +175,42 @@ const TapLeaderboardLibrary = {
     }
 };
 mergeInto(LibraryManager.library, TapLeaderboardLibrary);
+const TapPaymentLibrary = {
+    Tap_RequestPaymentGameItem:function(str, callbackId){
+        const callbackIdStr = _TJPointer_stringify_adaptor(callbackId);
+        try {
+            const args = _Tap_formatJsonStr(_TJPointer_stringify_adaptor(str));
+            tap.requestPaymentGameItem(Object.assign(args || {}, {
+                success: function(res) {
+                    _Tap_JSCallback(callbackIdStr, "success", {
+                        errCode: Number(res && res.errCode != null ? res.errCode : 0),
+                        errMsg: res && res.errMsg != null ? res.errMsg : ""
+                    });
+                },
+                fail: function(res) {
+                    _Tap_JSCallback(callbackIdStr, "fail", {
+                        errCode: Number(res && res.errCode != null ? res.errCode : -1),
+                        errMsg: res && res.errMsg != null ? res.errMsg : "requestPaymentGameItem failed"
+                    });
+                },
+                complete: function(res) {
+                    _Tap_JSCallback(callbackIdStr, "complete", {
+                        errCode: Number(res && res.errCode != null ? res.errCode : 0),
+                        errMsg: res && res.errMsg != null ? res.errMsg : ""
+                    });
+                }
+            }));
+        } catch (error) {
+            const result = {
+                errCode: -1,
+                errMsg: error && error.message || "requestPaymentGameItem failed"
+            };
+            _Tap_JSCallback(callbackIdStr, "fail", result);
+            _Tap_JSCallback(callbackIdStr, "complete", result);
+        }
+    }
+};
+mergeInto(LibraryManager.library, TapPaymentLibrary);
 const TapCloudSaveLibrary = {
     Tap_CreateCloudSaveManager:function() {
         window._tapCloudSaveManager = tap.getCloudSaveManager();

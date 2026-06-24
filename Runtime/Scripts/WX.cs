@@ -1271,15 +1271,6 @@ namespace WeChatWASM
             WXSDKManagerHandler.Instance.OpenPage(option);
         }
 
-        /// <summary>
-        /// requestMidasPaymentGameItem(Object object)
-        /// 发起米大师支付
-        /// </summary>
-        public static void RequestMidasPaymentGameItem(RequestMidasPaymentGameItemOption option)
-        {
-            WXSDKManagerHandler.Instance.RequestMidasPaymentGameItem(option);
-        }
-
         public static void RequestSubscribeLiveActivity(RequestSubscribeLiveActivityOption option)
         {
             WXSDKManagerHandler.Instance.RequestSubscribeLiveActivity(option);
