@@ -7,6 +7,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.20] - 2026-08-03
+### Changed
+1. 更新 UnityPlugin 引擎运行时编译产物
+
 ## [2.0.19] - 2026-06-01
 ### Added
 1. 支持新版支付接口
